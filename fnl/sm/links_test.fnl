@@ -1,8 +1,7 @@
 ;;; sm/links_test.fnl - Tests for links
 
-;; Setup path for standalone execution
-(let [fennel (require :fennel)]
-  (set fennel.path (.. "./fnl/?.fnl;" fennel.path)))
+;; Setup Lua path for compiled modules
+(set package.path (.. "./lua/?.lua;" package.path))
 
 ;; Mock dependencies BEFORE requiring modules
 (when (not _G.vim)
@@ -32,4 +31,4 @@
 ;; Test parse-link with multiple links (returns first)
 (assert (= (M.parse-link "[[first]] and [[second]]") "first") "parse: multiple links")
 
-(print "links_test.fnl: All tests passed")
+(print "links_test.lua: All tests passed")

@@ -1,8 +1,7 @@
 ;;; sm/state_test.fnl - Tests for state
 
-;; Setup path for standalone execution
-(let [fennel (require :fennel)]
-  (set fennel.path (.. "./fnl/?.fnl;" fennel.path)))
+;; Setup Lua path for compiled modules
+(set package.path (.. "./lua/?.lua;" package.path))
 
 ;; Simple JSON implementation for testing
 (fn json-encode [data]
@@ -105,4 +104,4 @@
     (assert (= (type result) "table") "read: handles empty file"))
   (os.remove test-file))
 
-(print "state_test.fnl: All tests passed")
+(print "state_test.lua: All tests passed")

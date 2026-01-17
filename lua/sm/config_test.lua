@@ -1,0 +1,49 @@
+package.path = ("./lua/?.lua;" .. package.path)
+if not _G.vim then
+  local function _1_(_, t1, t2)
+    local result = {}
+    for k, v in pairs(t1) do
+      result[k] = v
+    end
+    for k, v in pairs(t2) do
+      result[k] = v
+    end
+    return result
+  end
+  _G.vim = {tbl_deep_extend = _1_}
+else
+end
+local function _3_()
+  return "/tmp/test-nvim-cache"
+end
+package.loaded["kaza.file"] = {["nvim-cache"] = _3_}
+local M = require("sm.config")
+M.setup({})
+do
+  local cfg = M.get()
+  assert((cfg ~= nil), "get: auto-initializes config")
+  assert((cfg["date-format"] == "%Y%m%d_%H%M%S"), "get: has default date-format")
+end
+M.setup({})
+do
+  local dir = M["get-memos-dir"]()
+  assert((dir ~= nil), "get-memos-dir: returns value")
+  assert(dir:find("/memos$"), "get-memos-dir: ends with /memos")
+end
+M.setup({})
+do
+  local file = M["get-state-file"]()
+  assert((file ~= nil), "get-state-file: returns value")
+  assert(file:find("/state%.json$"), "get-state-file: ends with /state.json")
+end
+M.setup({["date-format"] = "%Y-%m-%d", ["custom-opt"] = "test"})
+do
+  local cfg = M.get()
+  assert((cfg["date-format"] == "%Y-%m-%d"), "setup: overrides defaults")
+  assert((cfg["custom-opt"] == "test"), "setup: adds custom options")
+end
+M.setup({["memos-dir"] = "/custom/memos"})
+assert((M["get-memos-dir"]() == "/custom/memos"), "get-memos-dir: respects custom path")
+M.setup({["state-file"] = "/custom/state.json"})
+assert((M["get-state-file"]() == "/custom/state.json"), "get-state-file: respects custom path")
+return print("config_test.lua: All tests passed")

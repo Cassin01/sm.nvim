@@ -1,8 +1,7 @@
 ;;; sm/memo_test.fnl - Tests for memo
 
-;; Setup path for standalone execution
-(let [fennel (require :fennel)]
-  (set fennel.path (.. "./fnl/?.fnl;" fennel.path)))
+;; Setup Lua path for compiled modules
+(set package.path (.. "./lua/?.lua;" package.path))
 
 ;; Mock dependencies BEFORE requiring modules
 (when (not _G.vim)
@@ -46,4 +45,4 @@
   (assert (= info.date "20260117_143052") "info: date")
   (assert (= info.title "my memo") "info: title with spaces"))
 
-(print "memo_test.fnl: All tests passed")
+(print "memo_test.lua: All tests passed")

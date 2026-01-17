@@ -1,8 +1,7 @@
 ;;; sm/tags_test.fnl - Tests for tags
 
-;; Setup path for standalone execution
-(let [fennel (require :fennel)]
-  (set fennel.path (.. "./fnl/?.fnl;" fennel.path)))
+;; Setup Lua path for compiled modules
+(set package.path (.. "./lua/?.lua;" package.path))
 
 ;; Mock dependencies BEFORE requiring modules
 (when (not _G.vim)
@@ -39,4 +38,4 @@
   (assert (= (length result.tags) 3) "parse: tags with spaces")
   (assert (= (. result.tags 1) "tag1") "parse: trimmed tag"))
 
-(print "tags_test.fnl: All tests passed")
+(print "tags_test.lua: All tests passed")

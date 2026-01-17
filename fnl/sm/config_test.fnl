@@ -1,8 +1,7 @@
 ;;; sm/config_test.fnl - Tests for config
 
-;; Setup path for standalone execution
-(let [fennel (require :fennel)]
-  (set fennel.path (.. "./fnl/?.fnl;" fennel.path)))
+;; Setup Lua path for compiled modules
+(set package.path (.. "./lua/?.lua;" package.path))
 
 ;; Mock vim BEFORE requiring modules
 (when (not _G.vim)
@@ -49,4 +48,4 @@
 (M.setup {:state-file "/custom/state.json"})
 (assert (= (M.get-state-file) "/custom/state.json") "get-state-file: respects custom path")
 
-(print "config_test.fnl: All tests passed")
+(print "config_test.lua: All tests passed")
