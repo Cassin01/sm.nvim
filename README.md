@@ -8,7 +8,7 @@ A memo management module for Neovim with tagging, wiki-style linking, and picker
 - YAML frontmatter with tags
 - Wiki-style `[[links]]` between memos
 - Floating window UI with Copilot support
-- **Picker-agnostic API** - works with any picker (Telescope, fzf-lua, snacks.nvim, mini.pick, wf.nvim)
+- **Picker-agnostic API** - works with any picker (fzf-lua, snacks.nvim, mini.pick, wf.nvim, etc.)
 
 ## Storage
 
@@ -16,36 +16,14 @@ Memos are stored in `~/.cache/nvim/sm/memos/` (default, configurable via `memos-
 
 ## Usage
 
-### Keymaps (Example)
-
-This plugin does not set any keymaps by default. Here's an example configuration in Lua:
-
-```lua
-local sm = require("sm")
-
-vim.keymap.set("n", "<Leader>mn", sm.create, { desc = "[sm] New memo with timestamp" })
-vim.keymap.set("n", "<Leader>ml", sm.list, { desc = "[sm] List all memos" })
-vim.keymap.set("n", "<Leader>mg", sm.grep, { desc = "[sm] Grep memo contents" })
-vim.keymap.set("n", "<Leader>mt", sm.tags, { desc = "[sm] Browse by tag" })
-vim.keymap.set("n", "<Leader>ms", sm["search-by-tag"], { desc = "[sm] Search by tag" })
-vim.keymap.set("n", "<Leader>mo", sm["open-last"], { desc = "[sm] Open last edited" })
-vim.keymap.set("n", "<Leader>mi", sm["insert-link"], { desc = "[sm] Insert wiki link" })
-vim.keymap.set("n", "<Leader>ma", sm["add-tag"], { desc = "[sm] Add tag to current memo" })
-```
-
 ### Commands
 
 | Command | Description |
 |---------|-------------|
 | `:SmNew [title]` | Create new memo (prompts if no title) |
 | `:SmOpen` | Open last edited memo |
-| `:SmList` | Picker for all memos |
-| `:SmGrep` | Live grep through memo contents |
-| `:SmTags` | Browse memos by tag |
-| `:SmTagSearch {tag}` | Search memos with specific tag |
 | `:SmAddTag [tag]` | Add tag to current memo |
 | `:SmFollowLink` | Follow wiki link under cursor |
-| `:SmInsertLink` | Insert wiki link from picker |
 
 ### Memo Format
 
@@ -151,137 +129,6 @@ vim.keymap.set("n", "<Leader>mi", function()
     end
   end
   wf.select(choices, { prompt = "Insert Link" })
-end, { desc = "Insert link" })
-```
-
-</details>
-
-<details>
-<summary><b>telescope.nvim</b></summary>
-
-If telescope.nvim is installed, the default commands (`sm.list()`, `sm.grep()`, etc.) work out of the box.
-
-For manual configuration:
-
-```lua
-local api = require("sm.api")
-local pickers = require("telescope.pickers")
-local finders = require("telescope.finders")
-local conf = require("telescope.config").values
-local actions = require("telescope.actions")
-local action_state = require("telescope.actions.state")
-local previewers = require("telescope.previewers")
-
-vim.keymap.set("n", "<Leader>ml", function()
-  local entries = api.get_memos()
-  pickers.new({}, {
-    prompt_title = "Memos",
-    finder = finders.new_table({
-      results = entries,
-      entry_maker = function(entry)
-        return {
-          value = entry.value,
-          display = entry.text,
-          ordinal = entry.ordinal,
-        }
-      end,
-    }),
-    sorter = conf.generic_sorter({}),
-    previewer = previewers.new_buffer_previewer({
-      title = "Memo Preview",
-      define_preview = function(self, entry, bufnr)
-        conf.buffer_previewer_maker(entry.value, bufnr, {})
-      end,
-    }),
-    attach_mappings = function(prompt_bufnr)
-      actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        api.open_memo(selection.value)
-      end)
-      return true
-    end,
-  }):find()
-end, { desc = "List memos" })
-
-vim.keymap.set("n", "<Leader>mg", function()
-  require("telescope.builtin").live_grep({
-    cwd = api.get_memos_dir(),
-    prompt_title = "Grep Memos",
-    glob_pattern = "*.md",
-  })
-end, { desc = "Grep memos" })
-
-vim.keymap.set("n", "<Leader>mt", function()
-  local entries = api.get_tags()
-  pickers.new({}, {
-    prompt_title = "Tags",
-    finder = finders.new_table({
-      results = entries,
-      entry_maker = function(entry)
-        return {
-          value = entry.value,
-          display = entry.text,
-          ordinal = entry.ordinal,
-        }
-      end,
-    }),
-    sorter = conf.generic_sorter({}),
-    attach_mappings = function(prompt_bufnr)
-      actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        local tag = selection.value
-        -- Show memos by tag
-        local memo_entries = api.get_memos_by_tag(tag)
-        pickers.new({}, {
-          prompt_title = "Memos [" .. tag .. "]",
-          finder = finders.new_table({
-            results = memo_entries,
-            entry_maker = function(e)
-              return { value = e.value, display = e.text, ordinal = e.ordinal }
-            end,
-          }),
-          sorter = conf.generic_sorter({}),
-          attach_mappings = function(pb)
-            actions.select_default:replace(function()
-              actions.close(pb)
-              local sel = action_state.get_selected_entry()
-              api.open_memo(sel.value)
-            end)
-            return true
-          end,
-        }):find()
-      end)
-      return true
-    end,
-  }):find()
-end, { desc = "Browse tags" })
-
-vim.keymap.set("n", "<Leader>mi", function()
-  local entries = api.get_memos_for_link()
-  pickers.new({}, {
-    prompt_title = "Insert Link",
-    finder = finders.new_table({
-      results = entries,
-      entry_maker = function(entry)
-        return {
-          value = entry.value,
-          display = entry.text,
-          ordinal = entry.ordinal,
-        }
-      end,
-    }),
-    sorter = conf.generic_sorter({}),
-    attach_mappings = function(prompt_bufnr)
-      actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        api.insert_link(selection.value)
-      end)
-      return true
-    end,
-  }):find()
 end, { desc = "Insert link" })
 ```
 
@@ -571,22 +418,17 @@ end, { desc = "Insert link" })
 | Function | Description |
 |----------|-------------|
 | `sm.create(?title)` | Create new memo |
-| `sm.open-last()` | Open last edited memo |
-| `sm.list()` | Open memo picker (Telescope if available) |
-| `sm.grep()` | Search memo contents |
+| `sm["open-last"]()` | Open last edited memo |
 
 ### Tag Operations
 
 | Function | Description |
 |----------|-------------|
-| `sm.tags()` | Browse memos by tag |
-| `sm.search-by-tag(tag)` | List memos with tag |
-| `sm.list-all-tags()` | Get all tags (for completion) |
-| `sm.add-tag(?tag)` | Add tag to current memo |
+| `sm["list-all-tags"]()` | Get all tags (for completion) |
+| `sm["add-tag"](?tag)` | Add tag to current memo |
 
 ### Link Operations
 
 | Function | Description |
 |----------|-------------|
-| `sm.follow-link()` | Follow wiki link under cursor |
-| `sm.insert-link()` | Insert link via picker |
+| `sm["follow-link"]()` | Follow wiki link under cursor |
