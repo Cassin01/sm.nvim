@@ -75,39 +75,6 @@
           (. end-pos 3)
           [link])))))
 
-(fn M.insert-link []
-  "Insert a wiki link by selecting from existing memos"
-  (let [pickers (require :telescope.pickers)
-        finders (require :telescope.finders)
-        conf (. (require :telescope.config) :values)
-        actions (require :telescope.actions)
-        action-state (require :telescope.actions.state)
-        memo (require :sm.memo)
-        files (memo.list)
-        entries []]
-    (each [_ filepath (ipairs files)]
-      (let [info (memo.get-memo-info filepath)
-            filename (vim.fn.fnamemodify filepath ":t:r")]
-        (table.insert entries
-          {:value filename
-           :display (.. info.date " | " info.title)
-           :ordinal (.. info.date " " info.title)})))
-    (: (pickers.new {}
-         {:prompt_title "Insert Link"
-          :finder (finders.new_table
-                    {:results entries
-                     :entry_maker (fn [entry] entry)})
-          :sorter (conf.generic_sorter {})
-          :attach_mappings (fn [prompt_bufnr map]
-            (actions.select_default:replace
-              (fn []
-                (actions.close prompt_bufnr)
-                (let [selection (action-state.get_selected_entry)
-                      link (.. "[[" selection.value "]]")]
-                  (vim.api.nvim_put [link] :c true true))))
-            true)})
-       :find)))
-
 (fn M.setup-buffer-mappings []
   "Setup buffer-local mappings for wiki links in memo buffers"
   (let [buf (vim.api.nvim_get_current_buf)

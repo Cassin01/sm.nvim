@@ -69,44 +69,15 @@ M["create-link-from-selection"] = function()
     return nil
   end
 end
-M["insert-link"] = function()
-  local pickers = require("telescope.pickers")
-  local finders = require("telescope.finders")
-  local conf = require("telescope.config").values
-  local actions = require("telescope.actions")
-  local action_state = require("telescope.actions.state")
-  local memo = require("sm.memo")
-  local files = memo.list()
-  local entries = {}
-  for _, filepath in ipairs(files) do
-    local info = memo["get-memo-info"](filepath)
-    local filename = vim.fn.fnamemodify(filepath, ":t:r")
-    table.insert(entries, {value = filename, display = (info.date .. " | " .. info.title), ordinal = (info.date .. " " .. info.title)})
-  end
-  local function _8_(entry)
-    return entry
-  end
-  local function _9_(prompt_bufnr, map)
-    local function _10_()
-      actions.close(prompt_bufnr)
-      local selection = action_state.get_selected_entry()
-      local link = ("[[" .. selection.value .. "]]")
-      return vim.api.nvim_put({link}, "c", true, true)
-    end
-    actions.select_default:replace(_10_)
-    return true
-  end
-  return pickers.new({}, {prompt_title = "Insert Link", finder = finders.new_table({results = entries, entry_maker = _8_}), sorter = conf.generic_sorter({}), attach_mappings = _9_}):find()
-end
 M["setup-buffer-mappings"] = function()
   local buf = vim.api.nvim_get_current_buf()
   local filepath = vim.api.nvim_buf_get_name(buf)
   local memos_dir = config["get-memos-dir"]()
   if vim.startswith(filepath, memos_dir) then
-    local function _11_()
+    local function _8_()
       return M["follow-link"]()
     end
-    return vim.keymap.set("n", "gf", _11_, {buffer = buf, desc = "Follow wiki link"})
+    return vim.keymap.set("n", "gf", _8_, {buffer = buf, desc = "Follow wiki link"})
   else
     return nil
   end

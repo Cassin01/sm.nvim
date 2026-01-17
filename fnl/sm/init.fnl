@@ -33,37 +33,12 @@
   (let [memo (require :sm.memo)]
     (memo.open-last)))
 
-(fn M.list []
-  "List all memos using Telescope"
-  (let [telescope (require :sm.telescope)]
-    (telescope.memo-picker)))
-
-(fn M.grep []
-  "Search memo contents using Telescope"
-  (let [telescope (require :sm.telescope)]
-    (telescope.memo-grep)))
-
-(fn M.tags []
-  "Browse memos by tag using Telescope"
-  (let [telescope (require :sm.telescope)]
-    (telescope.tag-picker)))
-
-(fn M.search-by-tag [tag]
-  "Search memos with specific tag"
-  (let [telescope (require :sm.telescope)]
-    (telescope.memos-by-tag-picker tag)))
-
 ;;; Public API - Link operations
 
 (fn M.follow-link []
   "Follow wiki link under cursor"
   (let [links (require :sm.links)]
     (links.follow-link)))
-
-(fn M.insert-link []
-  "Insert a wiki link by selecting from memos"
-  (let [links (require :sm.links)]
-    (links.insert-link)))
 
 ;;; Public API - Tag operations
 

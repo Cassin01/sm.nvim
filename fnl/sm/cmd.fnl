@@ -16,24 +16,6 @@
         (sm.create title)))
     {:nargs "?" :desc "Create new memo"})
 
-  (vim.api.nvim_create_user_command :SmList
-    (fn [] ((. (require :sm) :list)))
-    {:desc "List all memos"})
-
-  (vim.api.nvim_create_user_command :SmGrep
-    (fn [] ((. (require :sm) :grep)))
-    {:desc "Search memo contents"})
-
-  (vim.api.nvim_create_user_command :SmTags
-    (fn [] ((. (require :sm) :tags)))
-    {:desc "Browse memos by tag"})
-
-  (vim.api.nvim_create_user_command :SmTagSearch
-    (fn [opts] ((. (require :sm) :search-by-tag) opts.args))
-    {:nargs 1
-     :complete (fn [] ((. (require :sm) :list-all-tags)))
-     :desc "Search memos by tag"})
-
   (vim.api.nvim_create_user_command :SmAddTag
     (fn [opts]
       (let [tag (when (and opts.args (> (length opts.args) 0)) opts.args)]
@@ -44,10 +26,6 @@
 
   (vim.api.nvim_create_user_command :SmFollowLink
     (fn [] ((. (require :sm) :follow-link)))
-    {:desc "Follow wiki link under cursor"})
-
-  (vim.api.nvim_create_user_command :SmInsertLink
-    (fn [] ((. (require :sm) :insert-link)))
-    {:desc "Insert wiki link from picker"}))
+    {:desc "Follow wiki link under cursor"}))
 
 M

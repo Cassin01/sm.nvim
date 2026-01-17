@@ -23,29 +23,9 @@ M["open-last"] = function()
   local memo = require("sm.memo")
   return memo["open-last"]()
 end
-M.list = function()
-  local telescope = require("sm.telescope")
-  return telescope["memo-picker"]()
-end
-M.grep = function()
-  local telescope = require("sm.telescope")
-  return telescope["memo-grep"]()
-end
-M.tags = function()
-  local telescope = require("sm.telescope")
-  return telescope["tag-picker"]()
-end
-M["search-by-tag"] = function(tag)
-  local telescope = require("sm.telescope")
-  return telescope["memos-by-tag-picker"](tag)
-end
 M["follow-link"] = function()
   local links = require("sm.links")
   return links["follow-link"]()
-end
-M["insert-link"] = function()
-  local links = require("sm.links")
-  return links["insert-link"]()
 end
 M["list-all-tags"] = function()
   local tags = require("sm.tags")
