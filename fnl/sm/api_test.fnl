@@ -24,7 +24,7 @@
       {:list (fn []
                ["/tmp/memos/20260117_120000_first-memo.md"
                 "/tmp/memos/20260116_100000_second-memo.md"])
-       :get-memo-info (fn [filepath]
+       :get_memo_info (fn [filepath]
                         (let [filename (filepath:match "([^/]+)$")
                               date-part (filename:match "^(%d+_%d+)_")
                               title-part (-> filename
@@ -40,21 +40,21 @@
 
 ;; Mock sm.tags
 (tset package.loaded :sm.tags
-      {:get-memo-tags (fn [filepath]
+      {:get_memo_tags (fn [filepath]
                         (if (filepath:match "first")
                             ["work" "ideas"]
                             []))
-       :get-tags-with-counts (fn []
+       :get_tags_with_counts (fn []
                                [{:tag "work" :count 3}
                                 {:tag "ideas" :count 2}])
-       :get-memos-by-tag (fn [tag]
+       :get_memos_by_tag (fn [tag]
                            (if (= tag "work")
                                ["/tmp/memos/20260117_120000_first-memo.md"]
                                []))})
 
 ;; Mock sm.config
 (tset package.loaded :sm.config
-      {:get-memos-dir (fn [] "/tmp/test-memos")})
+      {:get_memos_dir (fn [] "/tmp/test-memos")})
 
 ;; Now require the module under test
 (local api (require :sm.api))

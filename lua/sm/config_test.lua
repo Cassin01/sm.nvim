@@ -32,28 +32,28 @@ M.setup({})
 do
   local cfg = M.get()
   assert((cfg ~= nil), "get: auto-initializes config")
-  assert((cfg["date_format"] == "%Y%m%d_%H%M%S"), "get: has default date_format")
+  assert((cfg.date_format == "%Y%m%d_%H%M%S"), "get: has default date-format")
 end
 M.setup({})
 do
-  local dir = M["get_memos_dir"]()
-  assert((dir ~= nil), "get_memos_dir: returns value")
-  assert(dir:find("/memos$"), "get_memos_dir: ends with /memos")
+  local dir = M.get_memos_dir()
+  assert((dir ~= nil), "get-memos-dir: returns value")
+  assert(dir:find("/memos$"), "get-memos-dir: ends with /memos")
 end
 M.setup({})
 do
-  local file = M["get_state_file"]()
-  assert((file ~= nil), "get_state_file: returns value")
-  assert(file:find("/state%.json$"), "get_state_file: ends with /state.json")
+  local file = M.get_state_file()
+  assert((file ~= nil), "get-state-file: returns value")
+  assert(file:find("/state%.json$"), "get-state-file: ends with /state.json")
 end
-M.setup({["date_format"] = "%Y-%m-%d", ["custom_opt"] = "test"})
+M.setup({date_format = "%Y-%m-%d", custom_opt = "test"})
 do
   local cfg = M.get()
-  assert((cfg["date_format"] == "%Y-%m-%d"), "setup: overrides defaults")
-  assert((cfg["custom_opt"] == "test"), "setup: adds custom options")
+  assert((cfg.date_format == "%Y-%m-%d"), "setup: overrides defaults")
+  assert((cfg.custom_opt == "test"), "setup: adds custom options")
 end
-M.setup({["memos_dir"] = "/custom/memos"})
-assert((M["get_memos_dir"]() == "/custom/memos"), "get_memos_dir: respects custom path")
-M.setup({["state_file"] = "/custom/state.json"})
-assert((M["get_state_file"]() == "/custom/state.json"), "get_state_file: respects custom path")
+M.setup({memos_dir = "/custom/memos"})
+assert((M.get_memos_dir() == "/custom/memos"), "get-memos-dir: respects custom path")
+M.setup({state_file = "/custom/state.json"})
+assert((M.get_state_file() == "/custom/state.json"), "get-state-file: respects custom path")
 return print("config_test.lua: All tests passed")

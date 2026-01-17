@@ -26,32 +26,32 @@
 (M.setup {})
 (let [cfg (M.get)]
   (assert (not= cfg nil) "get: auto-initializes config")
-  (assert (= cfg.date-format "%Y%m%d_%H%M%S") "get: has default date-format"))
+  (assert (= cfg.date_format "%Y%m%d_%H%M%S") "get: has default date-format"))
 
-;; Test get-memos-dir works
+;; Test get_memos_dir works
 (M.setup {})
-(let [dir (M.get-memos-dir)]
+(let [dir (M.get_memos_dir)]
   (assert (not= dir nil) "get-memos-dir: returns value")
   (assert (dir:find "/memos$") "get-memos-dir: ends with /memos"))
 
-;; Test get-state-file works
+;; Test get_state_file works
 (M.setup {})
-(let [file (M.get-state-file)]
+(let [file (M.get_state_file)]
   (assert (not= file nil) "get-state-file: returns value")
   (assert (file:find "/state%.json$") "get-state-file: ends with /state.json"))
 
 ;; Test M.setup merges user options
-(M.setup {:date-format "%Y-%m-%d" :custom-opt "test"})
+(M.setup {:date_format "%Y-%m-%d" :custom_opt "test"})
 (let [cfg (M.get)]
-  (assert (= cfg.date-format "%Y-%m-%d") "setup: overrides defaults")
-  (assert (= cfg.custom-opt "test") "setup: adds custom options"))
+  (assert (= cfg.date_format "%Y-%m-%d") "setup: overrides defaults")
+  (assert (= cfg.custom_opt "test") "setup: adds custom options"))
 
-;; Test custom memos-dir is respected
-(M.setup {:memos-dir "/custom/memos"})
-(assert (= (M.get-memos-dir) "/custom/memos") "get-memos-dir: respects custom path")
+;; Test custom memos_dir is respected
+(M.setup {:memos_dir "/custom/memos"})
+(assert (= (M.get_memos_dir) "/custom/memos") "get-memos-dir: respects custom path")
 
-;; Test custom state-file is respected
-(M.setup {:state-file "/custom/state.json"})
-(assert (= (M.get-state-file) "/custom/state.json") "get-state-file: respects custom path")
+;; Test custom state_file is respected
+(M.setup {:state_file "/custom/state.json"})
+(assert (= (M.get_state_file) "/custom/state.json") "get-state-file: respects custom path")
 
 (print "config_test.lua: All tests passed")

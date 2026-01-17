@@ -32,7 +32,7 @@ local function _7_(filepath)
   last_open_memo_call = filepath
   return true
 end
-package.loaded["sm.memo"] = {list = _5_, ["get_memo_info"] = _6_, open = _7_}
+package.loaded["sm.memo"] = {list = _5_, get_memo_info = _6_, open = _7_}
 local function _8_(filepath)
   if filepath:match("first") then
     return {"work", "ideas"}
@@ -50,11 +50,11 @@ local function _11_(tag)
     return {}
   end
 end
-package.loaded["sm.tags"] = {["get_memo_tags"] = _8_, ["get_tags_with_counts"] = _10_, ["get_memos_by_tag"] = _11_}
+package.loaded["sm.tags"] = {get_memo_tags = _8_, get_tags_with_counts = _10_, get_memos_by_tag = _11_}
 local function _13_()
   return "/tmp/test-memos"
 end
-package.loaded["sm.config"] = {["get_memos_dir"] = _13_}
+package.loaded["sm.config"] = {get_memos_dir = _13_}
 local api = require("sm.api")
 do
   local memos = api.get_memos()

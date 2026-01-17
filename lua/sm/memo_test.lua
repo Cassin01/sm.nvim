@@ -41,24 +41,24 @@ end
 local function _9_()
   return {}
 end
-package.loaded["sm.state"] = {["set_last_edited"] = _7_, ["add_recent"] = _8_, load = _9_}
+package.loaded["sm.state"] = {set_last_edited = _7_, add_recent = _8_, load = _9_}
 local M = require("sm.memo")
-assert((M["_sanitize_title"]("Hello World!") == "hello-world"), "sanitize: spaces and punctuation")
-assert((M["_sanitize_title"]("  Test  ") == "test"), "sanitize: trim whitespace")
-assert((M["_sanitize_title"]("My--Title") == "my-title"), "sanitize: collapse dashes")
-assert((M["_sanitize_title"]("CamelCase") == "camelcase"), "sanitize: lowercase")
+assert((M._sanitize_title("Hello World!") == "hello-world"), "sanitize: spaces and punctuation")
+assert((M._sanitize_title("  Test  ") == "test"), "sanitize: trim whitespace")
+assert((M._sanitize_title("My--Title") == "my-title"), "sanitize: collapse dashes")
+assert((M._sanitize_title("CamelCase") == "camelcase"), "sanitize: lowercase")
 do
-  local filename = M["generate_filename"]("test")
+  local filename = M.generate_filename("test")
   assert(filename:match("^%d+_%d+_test%.md$"), "filename: format YYYYMMDD_HHMMSS_title.md")
 end
 do
-  local content = M["generate_template"]("Test Title")
+  local content = M.generate_template("Test Title")
   assert(content:match("^%-%-%-"), "template: starts with frontmatter")
   assert(content:match("tags: %[%]"), "template: has empty tags")
   assert(content:match("# Test Title"), "template: has title heading")
 end
 do
-  local info = M["get_memo_info"]("/path/to/20260117_143052_my-memo.md")
+  local info = M.get_memo_info("/path/to/20260117_143052_my-memo.md")
   assert((info.filename == "20260117_143052_my-memo.md"), "info: filename")
   assert((info.date == "20260117_143052"), "info: date")
   assert((info.title == "my memo"), "info: title with spaces")
