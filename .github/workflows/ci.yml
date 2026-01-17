@@ -12,6 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Lua
+        run: sudo apt-get update && sudo apt-get install -y lua5.4
+
       - name: Install Fennel
         run: |
           curl -LO https://fennel-lang.org/downloads/fennel-1.5.1-linux-x86_64
