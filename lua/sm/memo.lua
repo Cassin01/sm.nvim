@@ -32,21 +32,31 @@ M.get_filepath = function(filename)
   return (config.get_memos_dir() .. "/" .. filename)
 end
 local function try_attach_copilot(attempts)
-  local max_attempts = 3
-  local delay = (attempts * 100)
-  local function _2_()
-    local ok, err
-    local function _3_()
-      return require("copilot.command").attach({force = true})
-    end
-    ok, err = pcall(_3_)
-    if (not ok and (attempts < max_attempts)) then
-      return try_attach_copilot((attempts + 1))
+  local cfg = config.get()
+  if cfg.copilot_integration then
+    local copilot_ok, copilot = pcall(require, "copilot.command")
+    if copilot_ok then
+      local max_attempts = 3
+      local delay = (attempts * 100)
+      local function _2_()
+        local ok, err
+        local function _3_()
+          return copilot.attach({force = true})
+        end
+        ok, err = pcall(_3_)
+        if (not ok and (attempts < max_attempts)) then
+          return try_attach_copilot((attempts + 1))
+        else
+          return nil
+        end
+      end
+      return vim.defer_fn(_2_, delay)
     else
       return nil
     end
+  else
+    return nil
   end
-  return vim.defer_fn(_2_, delay)
 end
 M.open_in_window = function(filepath, _3fopts)
   local cfg = config.get()
@@ -81,14 +91,14 @@ M.create = function(_3ftitle)
     state.add_recent(filename)
     return filepath
   else
-    local function _6_(input)
+    local function _8_(input)
       if (input and (#input > 0)) then
         return M.create(input)
       else
         return nil
       end
     end
-    return vim.ui.input({prompt = "Memo title: "}, _6_)
+    return vim.ui.input({prompt = "Memo title: "}, _8_)
   end
 end
 M.open = function(filepath)
@@ -110,10 +120,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _10_(a, b)
+  local function _12_(a, b)
     return (a > b)
   end
-  table.sort(files, _10_)
+  table.sort(files, _12_)
   return files
 end
 M.delete = function(filepath)
