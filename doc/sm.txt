@@ -162,7 +162,7 @@ sm.insert-link()
 ------------------------------------------------------------------------------
 MAPPINGS						*sm-mappings*
 
-|sm.nvim| sets up a single buffer-local mapping automatically:
+sm.nvim sets up a single buffer-local mapping automatically:
 
 	`gf`	Follow wiki link under cursor (in memo buffers only)
 
