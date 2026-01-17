@@ -69,7 +69,18 @@ local function json_decode(str)
   return func()
 end
 if not _G.vim then
-  local function _10_(_, t1, t2)
+  local function deepcopy(t)
+    if (type(t) == "table") then
+      local copy = {}
+      for k, v in pairs(t) do
+        copy[k] = deepcopy(v)
+      end
+      return copy
+    else
+      return t
+    end
+  end
+  local function _11_(_, t1, t2)
     local result = {}
     for k, v in pairs(t1) do
       result[k] = v
@@ -79,7 +90,7 @@ if not _G.vim then
     end
     return result
   end
-  local function _11_(path)
+  local function _12_(path)
     local handle, err = io.open((path .. "/."))
     if handle then
       handle:close()
@@ -88,23 +99,22 @@ if not _G.vim then
       return 0
     end
   end
-  local function _13_(path, mode)
+  local function _14_(path, mode)
     return os.execute(("mkdir -p \"" .. path .. "\""))
   end
-  local function _14_(path, modifier)
+  local function _15_(path, modifier)
     if (modifier == ":h") then
       return (path:match("(.+)/[^/]+$") or ".")
     else
       return path
     end
   end
-  _G.vim = {tbl_deep_extend = _10_, fn = {isdirectory = _11_, mkdir = _13_, fnamemodify = _14_, json_decode = json_decode, json_encode = json_encode}}
+  local function _17_(which)
+    return "/tmp/test-nvim-cache"
+  end
+  _G.vim = {tbl_deep_extend = _11_, deepcopy = deepcopy, fn = {isdirectory = _12_, mkdir = _14_, fnamemodify = _15_, json_decode = json_decode, json_encode = json_encode, stdpath = _17_}}
 else
 end
-local function _17_()
-  return "/tmp/test-nvim-cache"
-end
-package.loaded["kaza.file"] = {["nvim-cache"] = _17_}
 local M = require("sm.state")
 do
   local result = M["_read-json"]("/tmp/sm_nonexistent_test.json")

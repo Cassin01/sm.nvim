@@ -1,8 +1,9 @@
 local M = {}
 M.setup = function(_3fopts)
   local config = require("sm.config")
+  local cmd = require("sm.cmd")
   config.setup(_3fopts)
-  require("sm.cmd")
+  cmd.setup()
   return M["setup-autocmds"]()
 end
 M["setup-autocmds"] = function()

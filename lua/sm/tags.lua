@@ -1,5 +1,15 @@
 local M = {}
 local config = require("sm.config")
+local tags_cache = nil
+local cache_timestamp = 0
+local cache_ttl = 30
+local function cache_valid_3f()
+  return (tags_cache and ((os.time() - cache_timestamp) < cache_ttl))
+end
+M["invalidate-cache"] = function()
+  tags_cache = nil
+  return nil
+end
 M["parse-frontmatter"] = function(content)
   local frontmatter_pattern = "^%-%-%-\n(.-)\n%-%-%-"
   local frontmatter = content:match(frontmatter_pattern)
@@ -41,30 +51,36 @@ M["get-memo-tags"] = function(filepath)
   end
 end
 M["build-tags-index"] = function()
-  local memo = require("sm.memo")
-  local files = memo.list()
-  local index = {}
-  for _, filepath in ipairs(files) do
-    local tags = M["get-memo-tags"](filepath)
-    local filename = vim.fn.fnamemodify(filepath, ":t")
-    for _0, tag in ipairs(tags) do
-      if (index[tag] == nil) then
-        index[tag] = {}
-      else
+  if cache_valid_3f() then
+    return tags_cache
+  else
+    local memo = require("sm.memo")
+    local files = memo.list()
+    local index = {}
+    for _, filepath in ipairs(files) do
+      local tags = M["get-memo-tags"](filepath)
+      local filename = vim.fn.fnamemodify(filepath, ":t")
+      for _0, tag in ipairs(tags) do
+        if (index[tag] == nil) then
+          index[tag] = {}
+        else
+        end
+        table.insert(index[tag], filename)
       end
-      table.insert(index[tag], filename)
     end
+    tags_cache = index
+    cache_timestamp = os.time()
+    return index
   end
-  return index
 end
 M["get-memos-by-tag"] = function(tag)
   local index = M["build-tags-index"]()
   local filenames = (index[tag] or {})
   local dir = config["get-memos-dir"]()
-  local function _7_(_241)
+  local function _8_(_241)
     return (dir .. "/" .. _241)
   end
-  return vim.tbl_map(_7_, filenames)
+  return vim.tbl_map(_8_, filenames)
 end
 M["list-all-tags"] = function()
   local index = M["build-tags-index"]()
@@ -81,10 +97,10 @@ M["get-tags-with-counts"] = function()
   for tag, files in pairs(index) do
     table.insert(result, {tag = tag, count = #files})
   end
-  local function _8_(a, b)
+  local function _9_(a, b)
     return (a.count > b.count)
   end
-  table.sort(result, _8_)
+  table.sort(result, _9_)
   return result
 end
 M["add-tag-to-memo"] = function(filepath, tag)
@@ -100,9 +116,11 @@ M["add-tag-to-memo"] = function(filepath, tag)
       if file then
         file:write(new_content)
         file:close()
+        M["invalidate-cache"]()
         return true
       else
-        return nil
+        vim.notify(("Failed to add tag: " .. (err or "unknown error")), vim.log.levels.ERROR)
+        return false
       end
     else
       return nil
@@ -116,51 +134,24 @@ M["remove-tag-from-memo"] = function(filepath, tag)
   if content then
     local meta = M["parse-frontmatter"](content)
     local tags
-    local function _12_(_241)
+    local function _13_(_241)
       return (_241 ~= tag)
     end
-    tags = vim.tbl_filter(_12_, meta.tags)
+    tags = vim.tbl_filter(_13_, meta.tags)
     local new_tags_line = ("tags: [" .. table.concat(tags, ", ") .. "]")
     local new_content = content:gsub("tags:%s*%[[^%]]*%]", new_tags_line, 1)
     local file, err = io.open(filepath, "w")
     if file then
       file:write(new_content)
       file:close()
+      M["invalidate-cache"]()
       return true
     else
-      return nil
+      vim.notify(("Failed to remove tag: " .. (err or "unknown error")), vim.log.levels.ERROR)
+      return false
     end
   else
     return nil
   end
-end
-local method_name = ...
-if (method_name == nil) then
-  do
-    local content = "---\ntags: [work, ideas]\ncreated: 2026-01-17\n---\n# Test"
-    local result = M["parse-frontmatter"](content)
-    assert((#result.tags == 2), "parse: tag count")
-    assert((result.tags[1] == "work"), "parse: first tag")
-    assert((result.tags[2] == "ideas"), "parse: second tag")
-    assert((result.created == "2026-01-17"), "parse: created date")
-  end
-  do
-    local content = "---\ntags: []\ncreated: 2026-01-17\n---\n# Test"
-    local result = M["parse-frontmatter"](content)
-    assert((#result.tags == 0), "parse: empty tags")
-  end
-  do
-    local result = M["parse-frontmatter"]("No frontmatter here")
-    assert((#result.tags == 0), "parse: no frontmatter")
-    assert((result.created == nil), "parse: no created")
-  end
-  do
-    local content = "---\ntags: [ tag1 , tag2 , tag3 ]\n---\n"
-    local result = M["parse-frontmatter"](content)
-    assert((#result.tags == 3), "parse: tags with spaces")
-    assert((result.tags[1] == "tag1"), "parse: trimmed tag")
-  end
-  print("tags.fnl: All tests passed")
-else
 end
 return M

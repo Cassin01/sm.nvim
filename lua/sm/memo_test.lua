@@ -1,6 +1,17 @@
 package.path = ("./lua/?.lua;" .. package.path)
 if not _G.vim then
-  local function _1_(_, t1, t2)
+  local function deepcopy(t)
+    if (type(t) == "table") then
+      local copy = {}
+      for k, v in pairs(t) do
+        copy[k] = deepcopy(v)
+      end
+      return copy
+    else
+      return t
+    end
+  end
+  local function _2_(_, t1, t2)
     local result = {}
     for k, v in pairs(t1) do
       result[k] = v
@@ -10,28 +21,27 @@ if not _G.vim then
     end
     return result
   end
-  local function _2_(path, modifier)
+  local function _3_(path, modifier)
     if (modifier == ":t") then
       return path:match("([^/]+)$")
     else
       return path
     end
   end
-  _G.vim = {tbl_deep_extend = _1_, fn = {fnamemodify = _2_}}
+  local function _5_(which)
+    return "/tmp/test-nvim-cache"
+  end
+  _G.vim = {tbl_deep_extend = _2_, deepcopy = deepcopy, fn = {fnamemodify = _3_, stdpath = _5_}}
 else
-end
-local function _5_()
-  return "/tmp/test-nvim-cache"
-end
-package.loaded["kaza.file"] = {["nvim-cache"] = _5_}
-local function _6_()
 end
 local function _7_()
 end
 local function _8_()
+end
+local function _9_()
   return {}
 end
-package.loaded["sm.state"] = {["set-last-edited"] = _6_, ["add-recent"] = _7_, load = _8_}
+package.loaded["sm.state"] = {["set-last-edited"] = _7_, ["add-recent"] = _8_, load = _9_}
 local M = require("sm.memo")
 assert((M["_sanitize-title"]("Hello World!") == "hello-world"), "sanitize: spaces and punctuation")
 assert((M["_sanitize-title"]("  Test  ") == "test"), "sanitize: trim whitespace")

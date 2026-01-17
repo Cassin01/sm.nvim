@@ -5,12 +5,20 @@
 
 ;; Mock dependencies BEFORE requiring modules
 (when (not _G.vim)
+  (fn deepcopy [t]
+    (if (= (type t) :table)
+      (let [copy {}]
+        (each [k v (pairs t)]
+          (tset copy k (deepcopy v)))
+        copy)
+      t))
   (set _G.vim {:tbl_deep_extend (fn [_ t1 t2]
                                   (let [result {}]
                                     (each [k v (pairs t1)] (tset result k v))
                                     (each [k v (pairs t2)] (tset result k v))
-                                    result))}))
-(tset package.loaded :kaza.file {:nvim-cache (fn [] "/tmp/test-nvim-cache")})
+                                    result))
+               :deepcopy deepcopy
+               :fn {:stdpath (fn [which] "/tmp/test-nvim-cache")}}))
 
 (local M (require :sm.tags))
 

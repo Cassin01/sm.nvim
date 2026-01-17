@@ -43,6 +43,17 @@
   "Get full path for a memo filename"
   (.. (config.get-memos-dir) "/" filename))
 
+(fn try-attach-copilot [attempts]
+  "Try to attach copilot with exponential backoff"
+  (let [max-attempts 3
+        delay (* attempts 100)]  ; 100ms, 200ms, 300ms
+    (vim.defer_fn
+      (fn []
+        (let [(ok err) (pcall #((. (require :copilot.command) :attach) {:force true}))]
+          (when (and (not ok) (< attempts max-attempts))
+            (try-attach-copilot (+ attempts 1)))))
+      delay)))
+
 (fn M.open-in-window [filepath ?opts]
   "Open file in floating window"
   (let [cfg (config.get)
@@ -51,7 +62,7 @@
         height (or opts.height cfg.window.height)
         buf (vim.fn.bufadd filepath)]
     (vim.fn.bufload buf)
-    (vim.api.nvim_buf_set_option buf :filetype :markdown)
+    (tset vim.bo buf :filetype :markdown)
     (vim.api.nvim_open_win buf true
       {:relative :editor
        :style cfg.window.style
@@ -61,10 +72,7 @@
        :height height
        :width width})
     (tset vim.wo :wrap true)
-    (vim.defer_fn
-      (fn []
-        (pcall #((. (require :copilot.command) :attach) {:force true})))
-      150)
+    (try-attach-copilot 1)
     buf))
 
 (fn M.create [?title]
@@ -75,9 +83,11 @@
           filepath (M.get-filepath filename)
           content (M.generate-template ?title)]
       (let [(file err) (io.open filepath :w)]
-        (when file
-          (file:write content)
-          (file:close)))
+        (if file
+          (do
+            (file:write content)
+            (file:close))
+          (vim.notify (.. "Failed to create memo: " (or err "unknown error")) vim.log.levels.ERROR)))
       (M.open-in-window filepath)
       (state.set-last-edited filename)
       (state.add-recent filename)

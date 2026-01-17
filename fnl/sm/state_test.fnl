@@ -48,11 +48,19 @@
 
 ;; Mock dependencies BEFORE requiring modules
 (when (not _G.vim)
+  (fn deepcopy [t]
+    (if (= (type t) :table)
+      (let [copy {}]
+        (each [k v (pairs t)]
+          (tset copy k (deepcopy v)))
+        copy)
+      t))
   (set _G.vim {:tbl_deep_extend (fn [_ t1 t2]
                                   (let [result {}]
                                     (each [k v (pairs t1)] (tset result k v))
                                     (each [k v (pairs t2)] (tset result k v))
                                     result))
+               :deepcopy deepcopy
                :fn {:isdirectory (fn [path]
                                    ;; Check if directory exists by trying to open it
                                    (let [(handle err) (io.open (.. path "/."))]
@@ -67,8 +75,8 @@
                                        (or (path:match "(.+)/[^/]+$") ".")
                                        path))
                     :json_decode json-decode
-                    :json_encode json-encode}}))
-(tset package.loaded :kaza.file {:nvim-cache (fn [] "/tmp/test-nvim-cache")})
+                    :json_encode json-encode
+                    :stdpath (fn [which] "/tmp/test-nvim-cache")}}))
 
 (local M (require :sm.state))
 
