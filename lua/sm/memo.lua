@@ -18,12 +18,19 @@ M.generate_filename = function(title)
   local safe_title = sanitize_title(title)
   return (date .. "_" .. safe_title .. ".md")
 end
-M.generate_template = function(title)
+M.generate_template = function(title, _3finitial_tags)
   local cfg = config.get()
   local date_str = os.date("%Y-%m-%dT%H:%M:%S")
+  local tags = (_3finitial_tags or {})
+  local tags_str
+  if (#tags > 0) then
+    tags_str = table.concat(tags, ", ")
+  else
+    tags_str = ""
+  end
   local lines = {}
   for _, line in ipairs(cfg.template) do
-    local processed = line:gsub("%%date%%", date_str):gsub("%%title%%", title)
+    local processed = line:gsub("%%date%%", date_str):gsub("%%title%%", title):gsub("tags: %[%]", ("tags: [" .. tags_str .. "]"))
     table.insert(lines, processed)
   end
   return table.concat(lines, "\n")
@@ -31,22 +38,36 @@ end
 M.get_filepath = function(filename)
   return (config.get_memos_dir() .. "/" .. filename)
 end
+local function get_initial_tags()
+  local cfg = config.get()
+  local tags = {}
+  if cfg.auto_tag_git_repo then
+    local git = require("sm.git")
+    local repo_tag = git.get_repo_tag()
+    if repo_tag then
+      table.insert(tags, repo_tag)
+    else
+    end
+  else
+  end
+  return tags
+end
 local function try_attach_copilot(attempts)
   local max_attempts = 3
   local delay = (attempts * 100)
-  local function _2_()
+  local function _5_()
     local ok, err
-    local function _3_()
+    local function _6_()
       return require("copilot.command").attach({force = true})
     end
-    ok, err = pcall(_3_)
+    ok, err = pcall(_6_)
     if (not ok and (attempts < max_attempts)) then
       return try_attach_copilot((attempts + 1))
     else
       return nil
     end
   end
-  return vim.defer_fn(_2_, delay)
+  return vim.defer_fn(_5_, delay)
 end
 M.open_in_window = function(filepath, _3fopts)
   local cfg = config.get()
@@ -66,7 +87,8 @@ M.create = function(_3ftitle)
     local _ = ensure_memos_dir()
     local filename = M.generate_filename(_3ftitle)
     local filepath = M.get_filepath(filename)
-    local content = M.generate_template(_3ftitle)
+    local initial_tags = get_initial_tags()
+    local content = M.generate_template(_3ftitle, initial_tags)
     do
       local file, err = io.open(filepath, "w")
       if file then
@@ -81,14 +103,14 @@ M.create = function(_3ftitle)
     state.add_recent(filename)
     return filepath
   else
-    local function _6_(input)
+    local function _9_(input)
       if (input and (#input > 0)) then
         return M.create(input)
       else
         return nil
       end
     end
-    return vim.ui.input({prompt = "Memo title: "}, _6_)
+    return vim.ui.input({prompt = "Memo title: "}, _9_)
   end
 end
 M.open = function(filepath)
@@ -110,10 +132,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _10_(a, b)
+  local function _13_(a, b)
     return (a > b)
   end
-  table.sort(files, _10_)
+  table.sort(files, _13_)
   return files
 end
 M.delete = function(filepath)

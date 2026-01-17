@@ -6,6 +6,7 @@
   {:memos_dir nil  ; will be set to ~/.cache/nvim/sm/memos
    :state_file nil ; will be set to ~/.cache/nvim/sm/state.json
    :date_format "%Y%m%d_%H%M%S"
+   :auto_tag_git_repo false ; optional: add git repo name as tag when creating memo
    :template ["---"
               "tags: []"
               "created: %date%"

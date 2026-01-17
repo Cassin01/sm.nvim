@@ -56,4 +56,14 @@ M.setup({memos_dir = "/custom/memos"})
 assert((M.get_memos_dir() == "/custom/memos"), "get-memos-dir: respects custom path")
 M.setup({state_file = "/custom/state.json"})
 assert((M.get_state_file() == "/custom/state.json"), "get-state-file: respects custom path")
+M.setup({})
+do
+  local cfg = M.get()
+  assert((cfg.auto_tag_git_repo == false), "get: auto_tag_git_repo defaults to false")
+end
+M.setup({auto_tag_git_repo = true})
+do
+  local cfg = M.get()
+  assert((cfg.auto_tag_git_repo == true), "setup: auto_tag_git_repo can be enabled")
+end
 return print("config_test.lua: All tests passed")

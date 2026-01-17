@@ -1,5 +1,5 @@
 local M = {}
-local defaults = {memos_dir = nil, state_file = nil, date_format = "%Y%m%d_%H%M%S", template = {"---", "tags: []", "created: %date%", "---", "", "# %title%", ""}, window = {width = 80, height = 30, border = "rounded", style = "minimal"}}
+local defaults = {memos_dir = nil, state_file = nil, date_format = "%Y%m%d_%H%M%S", template = {"---", "tags: []", "created: %date%", "---", "", "# %title%", ""}, window = {width = 80, height = 30, border = "rounded", style = "minimal"}, auto_tag_git_repo = false}
 local config = nil
 M.get_base_dir = function()
   return (vim.fn.stdpath("cache") .. "/sm")

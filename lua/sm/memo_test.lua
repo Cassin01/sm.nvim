@@ -42,6 +42,13 @@ local function _9_()
   return {}
 end
 package.loaded["sm.state"] = {set_last_edited = _7_, add_recent = _8_, load = _9_}
+local function _10_()
+  return nil
+end
+local function _11_()
+  return false
+end
+package.loaded["sm.git"] = {get_repo_tag = _10_, is_git_repo = _11_}
 local M = require("sm.memo")
 assert((M._sanitize_title("Hello World!") == "hello-world"), "sanitize: spaces and punctuation")
 assert((M._sanitize_title("  Test  ") == "test"), "sanitize: trim whitespace")
@@ -62,5 +69,17 @@ do
   assert((info.filename == "20260117_143052_my-memo.md"), "info: filename")
   assert((info.date == "20260117_143052"), "info: date")
   assert((info.title == "my memo"), "info: title with spaces")
+end
+do
+  local content = M.generate_template("Test", {"tag1", "tag2"})
+  assert(content:match("tags: %[tag1, tag2%]"), "template: includes initial tags")
+end
+do
+  local content = M.generate_template("Test", {})
+  assert(content:match("tags: %[%]"), "template: empty tags when none provided")
+end
+do
+  local content = M.generate_template("Test")
+  assert(content:match("tags: %[%]"), "template: empty tags when nil provided")
 end
 return print("memo_test.lua: All tests passed")

@@ -29,6 +29,10 @@
                                  :add_recent (fn [])
                                  :load (fn [] {})})
 
+;; Mock git module BEFORE requiring memo
+(tset package.loaded :sm.git {:get_repo_tag (fn [] nil)
+                               :is_git_repo (fn [] false)})
+
 (local M (require :sm.memo))
 
 ;; Test sanitize_title
@@ -52,5 +56,17 @@
   (assert (= info.filename "20260117_143052_my-memo.md") "info: filename")
   (assert (= info.date "20260117_143052") "info: date")
   (assert (= info.title "my memo") "info: title with spaces"))
+
+;; Test generate_template with initial tags
+(let [content (M.generate_template "Test" ["tag1" "tag2"])]
+  (assert (content:match "tags: %[tag1, tag2%]") "template: includes initial tags"))
+
+;; Test generate_template with empty initial tags
+(let [content (M.generate_template "Test" [])]
+  (assert (content:match "tags: %[%]") "template: empty tags when none provided"))
+
+;; Test generate_template with nil initial tags (backward compatibility)
+(let [content (M.generate_template "Test")]
+  (assert (content:match "tags: %[%]") "template: empty tags when nil provided"))
 
 (print "memo_test.lua: All tests passed")
