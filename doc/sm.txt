@@ -228,11 +228,11 @@ Options:
 
 	memos-dir ~
 		Directory where memos are stored.
-		Default: `~/.cache/nvim/sm/memos`
+		Default: nil (computed as `stdpath("cache")/sm/memos`)
 
 	state-file ~
 		JSON file for persistent state (last edited, recent memos).
-		Default: `~/.cache/nvim/sm/state.json`
+		Default: nil (computed as `stdpath("cache")/sm/state.json`)
 
 	date-format ~
 		Format string for timestamp in filenames (see `os.date()`).
