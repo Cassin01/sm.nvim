@@ -1,13 +1,13 @@
 local M = {}
 local config = require("sm.config")
-local tags_cache = nil
-local cache_timestamp = 0
+local cache = {data = nil, timestamp = 0}
 local cache_ttl = 30
 local function cache_valid_3f()
-  return (tags_cache and ((os.time() - cache_timestamp) < cache_ttl))
+  local c = cache
+  return (c.data and ((os.time() - c.timestamp) < cache_ttl))
 end
 M.invalidate_cache = function()
-  tags_cache = nil
+  cache = {data = nil, timestamp = 0}
   return nil
 end
 M.parse_frontmatter = function(content)
@@ -52,7 +52,7 @@ M.get_memo_tags = function(filepath)
 end
 M.build_tags_index = function()
   if cache_valid_3f() then
-    return tags_cache
+    return cache.data
   else
     local memo = require("sm.memo")
     local files = memo.list()
@@ -68,8 +68,7 @@ M.build_tags_index = function()
         table.insert(index[tag], filename)
       end
     end
-    tags_cache = index
-    cache_timestamp = os.time()
+    cache = {data = index, timestamp = os.time()}
     return index
   end
 end

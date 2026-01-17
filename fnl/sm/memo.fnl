@@ -61,15 +61,19 @@
     tags))
 
 (fn try_attach_copilot [attempts]
-  "Try to attach copilot with exponential backoff"
-  (let [max_attempts 3
-        delay (* attempts 100)]  ; 100ms, 200ms, 300ms
-    (vim.defer_fn
-      (fn []
-        (let [(ok err) (pcall #((. (require :copilot.command) :attach) {:force true}))]
-          (when (and (not ok) (< attempts max_attempts))
-            (try_attach_copilot (+ attempts 1)))))
-      delay)))
+  "Try to attach copilot if enabled and available (with exponential backoff)"
+  (let [cfg (config.get)]
+    (when cfg.copilot_integration
+      (let [(copilot_ok copilot) (pcall require :copilot.command)]
+        (when copilot_ok
+          (let [max_attempts 3
+                delay (* attempts 100)]  ; 100ms, 200ms, 300ms
+            (vim.defer_fn
+              (fn []
+                (let [(ok err) (pcall #(copilot.attach {:force true}))]
+                  (when (and (not ok) (< attempts max_attempts))
+                    (try_attach_copilot (+ attempts 1)))))
+              delay)))))))
 
 (fn M.open_in_window [filepath ?opts]
   "Open file in floating window"

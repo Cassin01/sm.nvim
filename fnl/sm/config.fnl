@@ -7,6 +7,7 @@
    :state_file nil ; will be set to ~/.cache/nvim/sm/state.json
    :date_format "%Y%m%d_%H%M%S"
    :auto_tag_git_repo false ; optional: add git repo name as tag when creating memo
+   :copilot_integration false  ; opt-in: attach copilot to memo buffers
    :template ["---"
               "tags: []"
               "created: %date%"
@@ -20,6 +21,7 @@
             :style :minimal}})
 
 (var config nil)
+(var setup_called false)
 
 (fn M.get_base_dir []
   "Get base sm directory (~/.cache/nvim/sm)"
@@ -41,8 +43,14 @@
 
 (fn M.setup [?opts]
   "Initialize configuration with optional user overrides"
-  (set config (vim.tbl_deep_extend :force defaults (or ?opts {})))
-  config)
+  (if setup_called
+      (do
+        (vim.notify "sm.nvim: setup() called multiple times, ignoring subsequent call" vim.log.levels.WARN)
+        config)
+      (do
+        (set config (vim.tbl_deep_extend :force defaults (or ?opts {})))
+        (set setup_called true)
+        config)))
 
 (fn M.get []
   "Get current configuration (returns a deep copy), initialize with defaults if needed"
@@ -52,7 +60,8 @@
 
 (fn M.reset []
   "Reset configuration to nil (for testing/reloading)"
-  (set config nil))
+  (set config nil)
+  (set setup_called false))
 
 ;; Export for testing
 (tset M :_reset M.reset)

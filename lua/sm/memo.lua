@@ -53,21 +53,31 @@ local function get_initial_tags()
   return tags
 end
 local function try_attach_copilot(attempts)
-  local max_attempts = 3
-  local delay = (attempts * 100)
-  local function _5_()
-    local ok, err
-    local function _6_()
-      return require("copilot.command").attach({force = true})
-    end
-    ok, err = pcall(_6_)
-    if (not ok and (attempts < max_attempts)) then
-      return try_attach_copilot((attempts + 1))
+  local cfg = config.get()
+  if cfg.copilot_integration then
+    local copilot_ok, copilot = pcall(require, "copilot.command")
+    if copilot_ok then
+      local max_attempts = 3
+      local delay = (attempts * 100)
+      local function _5_()
+        local ok, err
+        local function _6_()
+          return copilot.attach({force = true})
+        end
+        ok, err = pcall(_6_)
+        if (not ok and (attempts < max_attempts)) then
+          return try_attach_copilot((attempts + 1))
+        else
+          return nil
+        end
+      end
+      return vim.defer_fn(_5_, delay)
     else
       return nil
     end
+  else
+    return nil
   end
-  return vim.defer_fn(_5_, delay)
 end
 M.open_in_window = function(filepath, _3fopts)
   local cfg = config.get()
@@ -103,14 +113,14 @@ M.create = function(_3ftitle)
     state.add_recent(filename)
     return filepath
   else
-    local function _9_(input)
+    local function _11_(input)
       if (input and (#input > 0)) then
         return M.create(input)
       else
         return nil
       end
     end
-    return vim.ui.input({prompt = "Memo title: "}, _9_)
+    return vim.ui.input({prompt = "Memo title: "}, _11_)
   end
 end
 M.open = function(filepath)
@@ -132,10 +142,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _13_(a, b)
+  local function _15_(a, b)
     return (a > b)
   end
-  table.sort(files, _13_)
+  table.sort(files, _15_)
   return files
 end
 M.delete = function(filepath)
