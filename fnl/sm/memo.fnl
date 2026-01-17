@@ -43,6 +43,41 @@
   "Get full path for a memo filename"
   (.. (config.get_memos_dir) "/" filename))
 
+(fn create_centered_input [prompt callback]
+  "Create centered floating input window"
+  (let [width 50
+        height 1
+        row (math.floor (/ (- vim.o.lines height) 2))
+        col (math.floor (/ (- vim.o.columns width) 2))
+        buf (vim.api.nvim_create_buf false true)
+        win (vim.api.nvim_open_win buf true
+              {:relative :editor
+               :width width
+               :height height
+               :row row
+               :col col
+               :style :minimal
+               :border :rounded
+               :title (.. " " prompt " ")
+               :title_pos :center})]
+    (fn close_input []
+      (when (vim.api.nvim_win_is_valid win)
+        (vim.api.nvim_win_close win true))
+      (when (vim.api.nvim_buf_is_valid buf)
+        (vim.api.nvim_buf_delete buf {:force true})))
+    (fn submit []
+      (let [lines (vim.api.nvim_buf_get_lines buf 0 1 false)
+            text (or (. lines 1) "")]
+        (close_input)
+        (when (> (length text) 0)
+          (callback text))))
+    (vim.keymap.set :i :<CR> submit {:buffer buf :noremap true})
+    (vim.keymap.set :n :<CR> submit {:buffer buf :noremap true})
+    (vim.keymap.set :i :<Esc> close_input {:buffer buf :noremap true})
+    (vim.keymap.set :n :<Esc> close_input {:buffer buf :noremap true})
+    (vim.keymap.set :n :q close_input {:buffer buf :noremap true})
+    (vim.cmd :startinsert)))
+
 (fn try_attach_copilot [attempts]
   "Try to attach copilot with exponential backoff"
   (let [max_attempts 3
@@ -67,8 +102,8 @@
       {:relative :editor
        :style cfg.window.style
        :border cfg.window.border
-       :row 3
-       :col (- vim.o.columns width 2)
+       :row (- vim.o.lines height 4)
+       :col 2
        :height height
        :width width})
     (tset vim.wo :wrap true)
@@ -92,10 +127,7 @@
       (state.set_last_edited filename)
       (state.add_recent filename)
       filepath)
-    (vim.ui.input {:prompt "Memo title: "}
-      (fn [input]
-        (when (and input (> (length input) 0))
-          (M.create input))))))
+    (create_centered_input "Memo title:" M.create)))
 
 (fn M.open [filepath]
   "Open specific memo"
