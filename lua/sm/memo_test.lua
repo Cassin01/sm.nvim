@@ -82,4 +82,39 @@ do
   local content = M.generate_template("Test")
   assert(content:match("tags: %[%]"), "template: empty tags when nil provided")
 end
+do
+  package.loaded["sm.config"] = nil
+  package.loaded["sm.git"] = nil
+  package.loaded["sm.memo"] = nil
+  local function _12_()
+    return {auto_tag_git_repo = true, date_format = "%Y%m%d_%H%M%S", template = {"---", "tags: [%tags%]", "created: %date%", "---", "", "# %title%", ""}}
+  end
+  local function _13_()
+    return "/tmp/test-memos"
+  end
+  package.loaded["sm.config"] = {get = _12_, get_memos_dir = _13_}
+  local function _14_()
+    return "test-repo"
+  end
+  local function _15_()
+    return true
+  end
+  package.loaded["sm.git"] = {get_repo_tag = _14_, is_git_repo = _15_}
+  local function _16_()
+  end
+  local function _17_()
+  end
+  local function _18_()
+    return {}
+  end
+  package.loaded["sm.state"] = {set_last_edited = _16_, add_recent = _17_, load = _18_}
+  local M2 = require("sm.memo")
+  do
+    local tags = M2._get_initial_tags()
+    assert((#tags == 1), "auto_tag: returns one tag")
+    assert((tags[1] == "test-repo"), "auto_tag: returns correct repo name")
+  end
+  local content = M2.generate_template("Test", M2._get_initial_tags())
+  assert(content:match("tags: %[test%-repo%]"), "auto_tag: template includes repo tag")
+end
 return print("memo_test.lua: All tests passed")

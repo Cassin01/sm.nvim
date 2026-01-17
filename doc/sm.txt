@@ -154,10 +154,11 @@ Default options:
 		memos_dir = nil,  -- computed as stdpath("cache")/sm/memos
 		state_file = nil, -- computed as stdpath("cache")/sm/state.json
 		date_format = "%Y%m%d_%H%M%S",
+		auto_tag_git_repo = false,
 
 		template = {
 			"---",
-			"tags: []",
+			"tags: [%tags%]",
 			"created: %date%",
 			"---",
 			"",
@@ -188,10 +189,17 @@ Options:
 		Format string for timestamp in filenames (see `os.date()`).
 		Default: `%Y%m%d_%H%M%S`
 
+	auto_tag_git_repo ~
+		When true, automatically add git repository name as a tag
+		when creating new memos. The repo name is sanitized to
+		lowercase with hyphens (e.g., "sm.nvim" becomes "sm-nvim").
+		Default: false
+
 	template ~
 		List of lines for new memo template. Supports variables:
 		- `%date%` - ISO 8601 timestamp (e.g., `2026-01-17T14:30:52`)
 		- `%title%` - Memo title
+		- `%tags%` - Initial tags (comma-separated)
 
 	window ~
 		Floating window configuration:

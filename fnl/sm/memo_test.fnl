@@ -69,4 +69,42 @@
 (let [content (M.generate_template "Test")]
   (assert (content:match "tags: %[%]") "template: empty tags when nil provided"))
 
+;; Test auto_tag_git_repo integration
+;; This tests the full flow: config enabled → git repo detected → tag added
+(do
+  ;; Clear package.loaded to allow re-mocking
+  (tset package.loaded :sm.config nil)
+  (tset package.loaded :sm.git nil)
+  (tset package.loaded :sm.memo nil)
+
+  ;; Mock config with auto_tag_git_repo=true
+  (tset package.loaded :sm.config
+        {:get (fn []
+                {:auto_tag_git_repo true
+                 :date_format "%Y%m%d_%H%M%S"
+                 :template ["---" "tags: [%tags%]" "created: %date%" "---" "" "# %title%" ""]})
+         :get_memos_dir (fn [] "/tmp/test-memos")})
+
+  ;; Mock git module to return a tag
+  (tset package.loaded :sm.git
+        {:get_repo_tag (fn [] "test-repo")
+         :is_git_repo (fn [] true)})
+
+  ;; Mock state module
+  (tset package.loaded :sm.state {:set_last_edited (fn [])
+                                   :add_recent (fn [])
+                                   :load (fn [] {})})
+
+  ;; Re-require memo with new mocks
+  (local M2 (require :sm.memo))
+
+  ;; Verify get_initial_tags returns the repo tag
+  (let [tags (M2._get_initial_tags)]
+    (assert (= (length tags) 1) "auto_tag: returns one tag")
+    (assert (= (. tags 1) "test-repo") "auto_tag: returns correct repo name"))
+
+  ;; Verify generate_template includes the tag when passed initial tags
+  (let [content (M2.generate_template "Test" (M2._get_initial_tags))]
+    (assert (content:match "tags: %[test%-repo%]") "auto_tag: template includes repo tag")))
+
 (print "memo_test.lua: All tests passed")

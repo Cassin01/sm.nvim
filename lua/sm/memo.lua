@@ -158,4 +158,5 @@ M.get_memo_info = function(filepath)
   return {filepath = filepath, filename = filename, date = date_part, title = title_part:gsub("-", " ")}
 end
 M["_sanitize_title"] = sanitize_title
+M["_get_initial_tags"] = get_initial_tags
 return M

@@ -164,5 +164,6 @@
 
 ;; Export for testing
 (tset M :_sanitize_title sanitize_title)
+(tset M :_get_initial_tags get_initial_tags)
 
 M
