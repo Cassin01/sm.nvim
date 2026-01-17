@@ -22,12 +22,12 @@ EXAMPLES		|sm-examples|
 INTRODUCTION						*sm-introduction*
 
 sm.nvim is a simple memo management plugin for Neovim with tagging,
-Telescope integration, and wiki-style linking.
+picker integration, and wiki-style linking.
 
 Features:
 - Create timestamped memos (`YYYYMMDD_HHMMSS_{title}.md`)
 - YAML frontmatter with tags
-- Telescope integration (list, grep, tag browsing)
+- Picker-agnostic API (works with any picker)
 - Wiki-style `[[links]]` between memos
 - Floating window UI with Copilot support
 - Persistent state tracking (last edited, recent memos)
@@ -36,7 +36,7 @@ Features:
 REQUIREMENTS						*sm-requirements*
 
 - Neovim 0.8.0+ (latest recommended)
-- telescope.nvim (required for pickers)
+- Any picker (fzf-lua, snacks.nvim, mini.pick, wf.nvim, etc.) - optional
 - copilot.vim (optional, for floating window support)
 
 ==============================================================================
@@ -46,7 +46,6 @@ Using lazy.nvim:
 	>
 	{
 		"Cassin01/sm.nvim",
-		dependencies = { "nvim-telescope/telescope.nvim" },
 		config = function()
 			require("sm").setup()
 		end
@@ -57,7 +56,6 @@ Using packer.nvim:
 	>
 	use {
 		"Cassin01/sm.nvim",
-		requires = { "nvim-telescope/telescope.nvim" },
 		config = function()
 			require("sm").setup()
 		end
@@ -79,22 +77,6 @@ COMMANDS						*sm-commands*
 :SmOpen
 	Open the last edited memo.
 
-							*:SmList*
-:SmList
-	Open Telescope picker showing all memos with previews.
-
-							*:SmGrep*
-:SmGrep
-	Live grep through memo contents using Telescope.
-
-							*:SmTags*
-:SmTags
-	Browse all tags with memo counts using Telescope.
-
-							*:SmTagSearch*
-:SmTagSearch {tag}
-	Search memos with a specific tag. Supports tab completion.
-
 							*:SmAddTag*
 :SmAddTag [tag]
 	Add a tag to the current memo's frontmatter. If [tag] is not provided,
@@ -106,10 +88,6 @@ COMMANDS						*sm-commands*
 	filename (case-insensitive). If the target memo does not exist, it
 	will be created.
 
-							*:SmInsertLink*
-:SmInsertLink
-	Insert a wiki link from Telescope picker.
-
 ------------------------------------------------------------------------------
 FUNCTIONS						*sm-functions*
 
@@ -119,45 +97,25 @@ Memo Operations ~
 sm.create([title])
 	Create a new memo with optional title. If title is nil, prompts user.
 
-							*sm.open-last()*
-sm.open-last()
+							*sm.open_last()*
+sm.open_last()
 	Open the last edited memo.
-
-							*sm.list()*
-sm.list()
-	Open Telescope memo picker.
-
-							*sm.grep()*
-sm.grep()
-	Search memo contents using Telescope live grep.
 
 Tag Operations ~
 
-							*sm.tags()*
-sm.tags()
-	Browse memos by tag using Telescope.
-
-							*sm.search-by-tag()*
-sm.search-by-tag([tag])
-	List all memos with a specific tag. If tag is nil, prompts user.
-
-							*sm.list-all-tags()*
-sm.list-all-tags()
+							*sm.list_all_tags()*
+sm.list_all_tags()
 	Get all tags as a list. Useful for custom completion.
 
-							*sm.add-tag()*
-sm.add-tag([tag])
+							*sm.add_tag()*
+sm.add_tag([tag])
 	Add a tag to the current memo's frontmatter.
 
 Link Operations ~
 
-							*sm.follow-link()*
-sm.follow-link()
+							*sm.follow_link()*
+sm.follow_link()
 	Follow wiki link under cursor.
-
-							*sm.insert-link()*
-sm.insert-link()
-	Insert a wiki link using Telescope picker.
 
 ------------------------------------------------------------------------------
 MAPPINGS						*sm-mappings*
@@ -175,19 +133,11 @@ Example user keymaps:
 
 	vim.keymap.set("n", "<Leader>mn", sm.create,
 		{ desc = "[sm] New memo" })
-	vim.keymap.set("n", "<Leader>ml", sm.list,
-		{ desc = "[sm] List all memos" })
-	vim.keymap.set("n", "<Leader>mg", sm.grep,
-		{ desc = "[sm] Grep contents" })
-	vim.keymap.set("n", "<Leader>mt", sm.tags,
-		{ desc = "[sm] Browse by tag" })
-	vim.keymap.set("n", "<Leader>ms", sm["search-by-tag"],
-		{ desc = "[sm] Search by tag" })
-	vim.keymap.set("n", "<Leader>mo", sm["open-last"],
+	vim.keymap.set("n", "<Leader>mo", sm.open_last,
 		{ desc = "[sm] Open last edited" })
-	vim.keymap.set("n", "<Leader>mi", sm["insert-link"],
-		{ desc = "[sm] Insert link" })
-	vim.keymap.set("n", "<Leader>ma", sm["add-tag"],
+	vim.keymap.set("n", "<Leader>mf", sm.follow_link,
+		{ desc = "[sm] Follow wiki link" })
+	vim.keymap.set("n", "<Leader>ma", sm.add_tag,
 		{ desc = "[sm] Add tag" })
 	<
 
@@ -201,9 +151,9 @@ sm.setup([opts])
 Default options:
 	>
 	{
-		["memos-dir"] = "~/.cache/nvim/sm/memos",
-		["state-file"] = "~/.cache/nvim/sm/state.json",
-		["date-format"] = "%Y%m%d_%H%M%S",
+		memos_dir = nil,  -- computed as stdpath("cache")/sm/memos
+		state_file = nil, -- computed as stdpath("cache")/sm/state.json
+		date_format = "%Y%m%d_%H%M%S",
 
 		template = {
 			"---",
@@ -226,15 +176,15 @@ Default options:
 
 Options:
 
-	memos-dir ~
+	memos_dir ~
 		Directory where memos are stored.
 		Default: nil (computed as `stdpath("cache")/sm/memos`)
 
-	state-file ~
+	state_file ~
 		JSON file for persistent state (last edited, recent memos).
 		Default: nil (computed as `stdpath("cache")/sm/state.json`)
 
-	date-format ~
+	date_format ~
 		Format string for timestamp in filenames (see `os.date()`).
 		Default: `%Y%m%d_%H%M%S`
 
@@ -258,7 +208,7 @@ Memo files are stored with timestamped filenames:
 	20260117_143052_meeting-notes.md
 	<
 
-The filename format is: `{date-format}_{sanitized-title}.md`
+The filename format is: `{date_format}_{sanitized-title}.md`
 
 Title sanitization:
 - Converted to lowercase
@@ -304,9 +254,6 @@ Navigation:
 - Press `gf` on a link to follow it
 - Use `:SmFollowLink` command
 
-Insert links:
-- Use `:SmInsertLink` or `sm.insert-link()` to pick from existing memos
-
 ==============================================================================
 EXAMPLES						*sm-examples*
 
@@ -318,7 +265,7 @@ Minimal setup:
 Custom memos directory:
 	>
 	require("sm").setup({
-		["memos-dir"] = vim.fn.expand("~/Documents/memos"),
+		memos_dir = vim.fn.expand("~/Documents/memos"),
 	})
 	<
 
@@ -327,7 +274,7 @@ Complete setup with keymaps:
 	local sm = require("sm")
 
 	sm.setup({
-		["memos-dir"] = "~/.local/share/nvim/memos",
+		memos_dir = "~/.local/share/nvim/memos",
 		window = {
 			width = 100,
 			height = 40,
@@ -337,19 +284,11 @@ Complete setup with keymaps:
 
 	vim.keymap.set("n", "<Leader>mn", sm.create,
 		{ desc = "[sm] New memo" })
-	vim.keymap.set("n", "<Leader>ml", sm.list,
-		{ desc = "[sm] List all memos" })
-	vim.keymap.set("n", "<Leader>mg", sm.grep,
-		{ desc = "[sm] Grep contents" })
-	vim.keymap.set("n", "<Leader>mt", sm.tags,
-		{ desc = "[sm] Browse by tag" })
-	vim.keymap.set("n", "<Leader>ms", sm["search-by-tag"],
-		{ desc = "[sm] Search by tag" })
-	vim.keymap.set("n", "<Leader>mo", sm["open-last"],
+	vim.keymap.set("n", "<Leader>mo", sm.open_last,
 		{ desc = "[sm] Open last edited" })
-	vim.keymap.set("n", "<Leader>mi", sm["insert-link"],
-		{ desc = "[sm] Insert wiki link" })
-	vim.keymap.set("n", "<Leader>ma", sm["add-tag"],
+	vim.keymap.set("n", "<Leader>mf", sm.follow_link,
+		{ desc = "[sm] Follow wiki link" })
+	vim.keymap.set("n", "<Leader>ma", sm.add_tag,
 		{ desc = "[sm] Add tag to current memo" })
 	<
 
