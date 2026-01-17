@@ -3,18 +3,18 @@
 (local M {})
 (local config (require :sm.config))
 
-;; Tag index cache
-(var tags_cache nil)
-(var cache_timestamp 0)
+;; Tag index cache (using single table for atomic updates)
+(var cache {:data nil :timestamp 0})
 (local cache_ttl 30)  ; 30 seconds TTL
 
 (fn cache_valid? []
-  "Check if cache is still valid"
-  (and tags_cache (< (- (os.time) cache_timestamp) cache_ttl)))
+  "Check if cache is still valid (atomic read)"
+  (let [c cache]  ; atomic read of entire cache state
+    (and c.data (< (- (os.time) c.timestamp) cache_ttl))))
 
 (fn M.invalidate_cache []
   "Force cache invalidation (call after modifying tags)"
-  (set tags_cache nil))
+  (set cache {:data nil :timestamp 0}))
 
 (fn M.parse_frontmatter [content]
   "Parse YAML frontmatter and extract metadata
@@ -59,7 +59,7 @@
   "Scan all memos and build tag -> files mapping (cached)
    Returns: {:tag1 [file1 file2] :tag2 [file3] ...}"
   (if (cache_valid?)
-    tags_cache
+    cache.data
     (let [memo (require :sm.memo)
           files (memo.list)
           index {}]
@@ -70,8 +70,8 @@
             (when (= (. index tag) nil)
               (tset index tag []))
             (table.insert (. index tag) filename))))
-      (set tags_cache index)
-      (set cache_timestamp (os.time))
+      ;; consistent update: readers see either old or new state, never partial
+      (set cache {:data index :timestamp (os.time)})
       index)))
 
 (fn M.get_memos_by_tag [tag]
