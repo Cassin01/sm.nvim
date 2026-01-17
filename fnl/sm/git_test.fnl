@@ -62,6 +62,9 @@
 (assert (= (M.sanitize_repo_name "--prefix--") "prefix") "sanitize: trim leading/trailing hyphens")
 (assert (= (M.sanitize_repo_name nil) nil) "sanitize: handles nil input")
 (assert (= (M.sanitize_repo_name "sm.nvim") "sm-nvim") "sanitize: dots to hyphens")
+(assert (= (M.sanitize_repo_name "---") nil) "sanitize: returns nil for only-special-chars")
+(assert (= (M.sanitize_repo_name "...") nil) "sanitize: returns nil for only dots")
+(assert (= (M.sanitize_repo_name "") nil) "sanitize: returns nil for empty string")
 
 ;; Test 6: get_repo_tag combines detection and sanitization
 (set_git_mock "/path/to/SM.nvim/.git")

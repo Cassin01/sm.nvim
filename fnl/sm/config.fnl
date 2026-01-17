@@ -9,7 +9,7 @@
    :auto_tag_git_repo false ; optional: add git repo name as tag when creating memo
    :copilot_integration false  ; opt-in: attach copilot to memo buffers
    :template ["---"
-              "tags: []"
+              "tags: [%tags%]"
               "created: %date%"
               "---"
               ""

@@ -22,15 +22,10 @@ M.generate_template = function(title, _3finitial_tags)
   local cfg = config.get()
   local date_str = os.date("%Y-%m-%dT%H:%M:%S")
   local tags = (_3finitial_tags or {})
-  local tags_str
-  if (#tags > 0) then
-    tags_str = table.concat(tags, ", ")
-  else
-    tags_str = ""
-  end
+  local tags_str = table.concat(tags, ", ")
   local lines = {}
   for _, line in ipairs(cfg.template) do
-    local processed = line:gsub("%%date%%", date_str):gsub("%%title%%", title):gsub("tags: %[%]", ("tags: [" .. tags_str .. "]"))
+    local processed = line:gsub("%%date%%", date_str):gsub("%%title%%", title):gsub("%%tags%%", tags_str):gsub("tags: %[%]", ("tags: [" .. tags_str .. "]"), 1)
     table.insert(lines, processed)
   end
   return table.concat(lines, "\n")
@@ -59,19 +54,19 @@ local function try_attach_copilot(attempts)
     if copilot_ok then
       local max_attempts = 3
       local delay = (attempts * 100)
-      local function _5_()
+      local function _4_()
         local ok, err
-        local function _6_()
+        local function _5_()
           return copilot.attach({force = true})
         end
-        ok, err = pcall(_6_)
+        ok, err = pcall(_5_)
         if (not ok and (attempts < max_attempts)) then
           return try_attach_copilot((attempts + 1))
         else
           return nil
         end
       end
-      return vim.defer_fn(_5_, delay)
+      return vim.defer_fn(_4_, delay)
     else
       return nil
     end
@@ -113,14 +108,14 @@ M.create = function(_3ftitle)
     state.add_recent(filename)
     return filepath
   else
-    local function _11_(input)
+    local function _10_(input)
       if (input and (#input > 0)) then
         return M.create(input)
       else
         return nil
       end
     end
-    return vim.ui.input({prompt = "Memo title: "}, _11_)
+    return vim.ui.input({prompt = "Memo title: "}, _10_)
   end
 end
 M.open = function(filepath)
@@ -142,10 +137,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _15_(a, b)
+  local function _14_(a, b)
     return (a > b)
   end
-  table.sort(files, _15_)
+  table.sort(files, _14_)
   return files
 end
 M.delete = function(filepath)

@@ -29,19 +29,20 @@
 
 (fn M.generate_template [title ?initial-tags]
   "Generate memo content from template.
-   ?initial-tags: optional list of tags to include"
+   ?initial-tags: optional list of tags to include
+   Supports %tags% placeholder (preferred) and legacy tags: [] format"
   (let [cfg (config.get)
         date_str (os.date "%Y-%m-%dT%H:%M:%S")
         tags (or ?initial-tags [])
-        tags_str (if (> (length tags) 0)
-                    (table.concat tags ", ")
-                    "")
+        tags_str (table.concat tags ", ")
         lines []]
     (each [_ line (ipairs cfg.template)]
       (local processed (-> line
                           (: :gsub "%%date%%" date_str)
                           (: :gsub "%%title%%" title)
-                          (: :gsub "tags: %[%]" (.. "tags: [" tags_str "]"))))
+                          (: :gsub "%%tags%%" tags_str)
+                          ;; Backward compat: legacy "tags: []" templates (replace once)
+                          (: :gsub "tags: %[%]" (.. "tags: [" tags_str "]") 1)))
       (table.insert lines processed))
     (table.concat lines "\n")))
 

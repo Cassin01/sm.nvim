@@ -2,13 +2,6 @@
 
 (local M {})
 
-(fn M.is_git_repo []
-  "Check if current working directory is inside a git repository.
-   Uses finddir to search upward from cwd for .git directory.
-   Returns: boolean"
-  (let [git_dir (vim.fn.finddir ".git" ".;")]
-    (and git_dir (> (length git_dir) 0))))
-
 (fn M.get_repo_name []
   "Extract repository name from git repo root directory.
    Returns: string repo name or nil if not in a git repo"
@@ -16,15 +9,24 @@
     (when (and git_dir (> (length git_dir) 0))
       (vim.fn.fnamemodify git_dir ":h:t"))))
 
+(fn M.is_git_repo []
+  "Check if current working directory is inside a git repository.
+   Uses get_repo_name to avoid duplicate finddir calls.
+   Returns: boolean"
+  (not= (M.get_repo_name) nil))
+
 (fn M.sanitize_repo_name [name]
-  "Convert repo name to safe tag format (lowercase, hyphens for separators)"
+  "Convert repo name to safe tag format (lowercase, hyphens for separators).
+   Returns nil if name is nil or sanitized result is empty."
   (when name
-    (-> name
-        (: :lower)
-        (: :gsub "[^%w%-]+" "-")
-        (: :gsub "^%-+" "")
-        (: :gsub "%-+$" "")
-        (: :gsub "%-%-+" "-"))))
+    (let [sanitized (-> name
+                        (: :lower)
+                        (: :gsub "[^%w%-]+" "-")
+                        (: :gsub "^%-+" "")
+                        (: :gsub "%-+$" "")
+                        (: :gsub "%-%-+" "-"))]
+      (when (> (length sanitized) 0)
+        sanitized))))
 
 (fn M.get_repo_tag []
   "Get sanitized repository name suitable for use as a tag.
