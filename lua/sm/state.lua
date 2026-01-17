@@ -72,47 +72,6 @@ M["add-recent"] = function(filename)
   state["recent"] = filtered
   return M.save(state)
 end
-local method_name = ...
-if (method_name == nil) then
-  do
-    local result = read_json("/tmp/sm_nonexistent_test.json")
-    assert((type(result) == "table"), "read: returns table for missing file")
-    assert((next(result) == nil), "read: returns empty table")
-  end
-  do
-    local test_file = "/tmp/sm_test_state.json"
-    local data = {test = "value", num = 42, nested = {a = 1}}
-    assert(write_json(test_file, data), "write: returns true on success")
-    do
-      local loaded = read_json(test_file)
-      assert((loaded.test == "value"), "roundtrip: string value")
-      assert((loaded.num == 42), "roundtrip: number value")
-      assert((loaded.nested.a == 1), "roundtrip: nested value")
-    end
-    os.remove(test_file)
-  end
-  do
-    local test_file = "/tmp/sm_test_dir/nested/state.json"
-    local data = {created = true}
-    write_json(test_file, data)
-    do
-      local loaded = read_json(test_file)
-      assert((loaded.created == true), "write: creates nested dirs")
-    end
-    os.remove(test_file)
-    os.execute("rm -rf /tmp/sm_test_dir")
-  end
-  do
-    local test_file = "/tmp/sm_empty_test.json"
-    local file = io.open(test_file, "w")
-    file:close()
-    do
-      local result = read_json(test_file)
-      assert((type(result) == "table"), "read: handles empty file")
-    end
-    os.remove(test_file)
-  end
-  print("state.fnl: All tests passed")
-else
-end
+M["_read-json"] = read_json
+M["_write-json"] = write_json
 return M

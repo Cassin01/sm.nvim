@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua
+        run: sudo apt-get update && sudo apt-get install -y lua5.4
+
+      - name: Install Fennel
+        run: |
+          curl -LO https://fennel-lang.org/downloads/fennel-1.5.1-linux-x86_64
+          chmod +x fennel-1.5.1-linux-x86_64
+          sudo mv fennel-1.5.1-linux-x86_64 /usr/local/bin/fennel
+
+      - name: Compile Fennel to Lua
+        run: make all
+
+      - name: Check Lua files are up-to-date
+        run: |
+          if [ -n "$(git status --porcelain lua/)" ]; then
+            echo "Error: Lua files are out of sync with Fennel sources"
+            git diff lua/
+            exit 1
+          fi
+          echo "Lua files are up-to-date"
+
+      - name: Run tests
+        run: make test

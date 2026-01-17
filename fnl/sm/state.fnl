@@ -66,42 +66,8 @@
     (tset state :recent filtered)
     (M.save state)))
 
-;;; test (run with: fennel fnl/sm/state.fnl)
-
-(local (method-name) ...)
-(when (= method-name nil)
-  ;; Test read-json with non-existent file
-  (let [result (read-json "/tmp/sm_nonexistent_test.json")]
-    (assert (= (type result) "table") "read: returns table for missing file")
-    (assert (= (next result) nil) "read: returns empty table"))
-
-  ;; Test write-json / read-json roundtrip
-  (let [test-file "/tmp/sm_test_state.json"
-        data {:test "value" :num 42 :nested {:a 1}}]
-    (assert (write-json test-file data) "write: returns true on success")
-    (let [loaded (read-json test-file)]
-      (assert (= loaded.test "value") "roundtrip: string value")
-      (assert (= loaded.num 42) "roundtrip: number value")
-      (assert (= loaded.nested.a 1) "roundtrip: nested value"))
-    (os.remove test-file))
-
-  ;; Test write-json creates directory
-  (let [test-file "/tmp/sm_test_dir/nested/state.json"
-        data {:created true}]
-    (write-json test-file data)
-    (let [loaded (read-json test-file)]
-      (assert (= loaded.created true) "write: creates nested dirs"))
-    (os.remove test-file)
-    (os.execute "rm -rf /tmp/sm_test_dir"))
-
-  ;; Test read-json with empty file
-  (let [test-file "/tmp/sm_empty_test.json"
-        (file) (io.open test-file :w)]
-    (file:close)
-    (let [result (read-json test-file)]
-      (assert (= (type result) "table") "read: handles empty file"))
-    (os.remove test-file))
-
-  (print "state.fnl: All tests passed"))
+;; Export for testing
+(tset M :_read-json read-json)
+(tset M :_write-json write-json)
 
 M

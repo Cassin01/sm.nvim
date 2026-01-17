@@ -101,26 +101,3 @@ Links match by partial filename (case-insensitive).
 | `sm.insert-link()` | Insert link via picker |
 
 ## Module Structure
-
-```
-fnl/sm/
-  init.fnl       -- Public API
-  config.fnl     -- Configuration management
-  state.fnl      -- State persistence (last edited)
-  memo.fnl       -- Core memo CRUD operations
-  tags.fnl       -- Tag parsing and indexing
-  telescope.fnl  -- Telescope pickers
-  links.fnl      -- Wiki-style link handling
-```
-
-## Testing
-
-Each module has inline tests. Run with:
-
-```bash
-cd ~/.config/nvim
-fennel fnl/sm/memo.fnl
-fennel fnl/sm/tags.fnl
-fennel fnl/sm/links.fnl
-fennel fnl/sm/state.fnl
-```

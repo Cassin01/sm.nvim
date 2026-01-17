@@ -118,29 +118,5 @@ M["get-memo-info"] = function(filepath)
   local title_part = (filename:match("^%d+_%d+_(.+)%.md$") or "untitled")
   return {filepath = filepath, filename = filename, date = date_part, title = title_part:gsub("-", " ")}
 end
-local method_name = ...
-if (method_name == nil) then
-  assert((sanitize_title("Hello World!") == "hello-world"), "sanitize: spaces and punctuation")
-  assert((sanitize_title("  Test  ") == "test"), "sanitize: trim whitespace")
-  assert((sanitize_title("My--Title") == "my-title"), "sanitize: collapse dashes")
-  assert((sanitize_title("CamelCase") == "camelcase"), "sanitize: lowercase")
-  do
-    local filename = M["generate-filename"]("test")
-    assert(filename:match("^%d+_%d+_test%.md$"), "filename: format YYYYMMDD_HHMMSS_title.md")
-  end
-  do
-    local content = M["generate-template"]("Test Title")
-    assert(content:match("^%-%-%-"), "template: starts with frontmatter")
-    assert(content:match("tags: %[%]"), "template: has empty tags")
-    assert(content:match("# Test Title"), "template: has title heading")
-  end
-  do
-    local info = M["get-memo-info"]("/path/to/20260117_143052_my-memo.md")
-    assert((info.filename == "20260117_143052_my-memo.md"), "info: filename")
-    assert((info.date == "20260117_143052"), "info: date")
-    assert((info.title == "my memo"), "info: title with spaces")
-  end
-  print("memo.fnl: All tests passed")
-else
-end
+M["_sanitize-title"] = sanitize_title
 return M
