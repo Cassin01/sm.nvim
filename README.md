@@ -16,6 +16,19 @@ Memos are stored in `~/.cache/nvim/sm/memos/` (default, configurable via `memos-
 
 ## Usage
 
+### Keymaps (Example)
+
+This plugin does not set any keymaps by default. Here's an example configuration in Lua:
+
+```lua
+local sm = require("sm")
+
+vim.keymap.set("n", "<Leader>mn", sm.create, { desc = "[sm] New memo with timestamp" })
+vim.keymap.set("n", "<Leader>mo", sm["open-last"], { desc = "[sm] Open last edited" })
+vim.keymap.set("n", "<Leader>mf", sm["follow-link"], { desc = "[sm] Follow wiki link under cursor" })
+vim.keymap.set("n", "<Leader>ma", sm["add-tag"], { desc = "[sm] Add tag to current memo" })
+```
+
 ### Commands
 
 | Command | Description |
