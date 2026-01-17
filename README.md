@@ -16,18 +16,22 @@ Memos are stored in `~/.cache/nvim/sm/memos/`
 
 ## Usage
 
-### Keymaps (`<Space>m` prefix)
+### Keymaps (Example)
 
-| Key | Description |
-|-----|-------------|
-| `<Space>em` | Quick scratch memo (single file) |
-| `<Space>en` | **N**ew memo with timestamp |
-| `<Space>el` | **L**ist all memos |
-| `<Space>eg` | **G**rep memo contents |
-| `<Space>et` | Browse by **t**ag |
-| `<Space>es` | **S**earch by tag |
-| `<Space>eo` | **O**pen last edited |
-| `<Space>ei` | **I**nsert wiki link |
+This plugin does not set any keymaps by default. Here's an example configuration in Lua:
+
+```lua
+local sm = require("sm")
+
+vim.keymap.set("n", "<Leader>mn", sm.create, { desc = "[sm] New memo with timestamp" })
+vim.keymap.set("n", "<Leader>ml", sm.list, { desc = "[sm] List all memos" })
+vim.keymap.set("n", "<Leader>mg", sm.grep, { desc = "[sm] Grep memo contents" })
+vim.keymap.set("n", "<Leader>mt", sm.tags, { desc = "[sm] Browse by tag" })
+vim.keymap.set("n", "<Leader>ms", sm["search-by-tag"], { desc = "[sm] Search by tag" })
+vim.keymap.set("n", "<Leader>mo", sm["open-last"], { desc = "[sm] Open last edited" })
+vim.keymap.set("n", "<Leader>mi", sm["insert-link"], { desc = "[sm] Insert wiki link" })
+vim.keymap.set("n", "<Leader>ma", sm["add-tag"], { desc = "[sm] Add tag to current memo" })
+```
 
 ### Commands
 
@@ -65,12 +69,16 @@ Links match by partial filename (case-insensitive).
 
 ## Configuration
 
-```fennel
-(local sm (require :sm))
-(sm.setup {:memos-dir "~/.cache/nvim/sm/memos"
-           :window {:width 80
-                    :height 30
-                    :border :rounded}})
+```lua
+local sm = require("sm")
+sm.setup({
+  ["memos-dir"] = "~/.cache/nvim/sm/memos",
+  window = {
+    width = 80,
+    height = 30,
+    border = "rounded",
+  },
+})
 ```
 
 ## API
