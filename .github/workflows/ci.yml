@@ -31,7 +31,4 @@ jobs:
           echo "Lua files are up-to-date"
 
       - name: Run tests
-        run: |
-          for test in lua/sm/*_test.lua; do
-            [ -f "$test" ] && lua "$test"
-          done
+        run: make test
