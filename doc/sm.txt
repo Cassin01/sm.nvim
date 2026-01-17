@@ -1,0 +1,377 @@
+*sm.txt*	A simple memo management plugin for Neovim
+
+Author: Cassin01
+License: MIT license
+
+CONTENTS						*sm-contents*
+
+INTRODUCTION		|sm-introduction|
+REQUIREMENTS		|sm-requirements|
+INSTALL			|sm-install|
+INTERFACE		|sm-interface|
+ COMMANDS		|sm-commands|
+ FUNCTIONS		|sm-functions|
+ MAPPINGS		|sm-mappings|
+ OPTIONS		|sm-options|
+MEMO FORMAT		|sm-memo-format|
+ FRONTMATTER		|sm-frontmatter|
+ WIKI LINKS		|sm-wiki-links|
+EXAMPLES		|sm-examples|
+
+==============================================================================
+INTRODUCTION						*sm-introduction*
+
+|sm.nvim| is a simple memo management plugin for Neovim with tagging,
+Telescope integration, and wiki-style linking.
+
+Features:
+- Create timestamped memos (`YYYYMMDD_HHMMSS_{title}.md`)
+- YAML frontmatter with tags
+- Telescope integration (list, grep, tag browsing)
+- Wiki-style `[[links]]` between memos
+- Floating window UI with Copilot support
+- Persistent state tracking (last edited, recent memos)
+
+==============================================================================
+REQUIREMENTS						*sm-requirements*
+
+- Neovim 0.8.0+ (latest recommended)
+- telescope.nvim (required for pickers)
+- copilot.vim (optional, for floating window support)
+
+==============================================================================
+INSTALL							*sm-install*
+
+Using lazy.nvim:
+	>
+	{
+		"Cassin01/sm.nvim",
+		dependencies = { "nvim-telescope/telescope.nvim" },
+		config = function()
+			require("sm").setup()
+		end
+	}
+	<
+
+Using packer.nvim:
+	>
+	use {
+		"Cassin01/sm.nvim",
+		requires = { "nvim-telescope/telescope.nvim" },
+		config = function()
+			require("sm").setup()
+		end
+	}
+	<
+
+==============================================================================
+INTERFACE						*sm-interface*
+
+------------------------------------------------------------------------------
+COMMANDS						*sm-commands*
+
+							*:SmNew*
+:SmNew [title]
+	Create a new memo. If [title] is not provided, prompts for input.
+	The memo is created with timestamp prefix: `YYYYMMDD_HHMMSS_{title}.md`
+
+							*:SmOpen*
+:SmOpen
+	Open the last edited memo.
+
+							*:SmList*
+:SmList
+	Open Telescope picker showing all memos with previews.
+
+							*:SmGrep*
+:SmGrep
+	Live grep through memo contents using Telescope.
+
+							*:SmTags*
+:SmTags
+	Browse all tags with memo counts using Telescope.
+
+							*:SmTagSearch*
+:SmTagSearch {tag}
+	Search memos with a specific tag. Supports tab completion.
+
+							*:SmAddTag*
+:SmAddTag [tag]
+	Add a tag to the current memo's frontmatter. If [tag] is not provided,
+	prompts for input. Supports tab completion for existing tags.
+
+							*:SmFollowLink*
+:SmFollowLink
+	Follow the wiki link under the cursor. Links are matched by partial
+	filename (case-insensitive). If the target memo does not exist, it
+	will be created.
+
+							*:SmInsertLink*
+:SmInsertLink
+	Insert a wiki link from Telescope picker.
+
+------------------------------------------------------------------------------
+FUNCTIONS						*sm-functions*
+
+Memo Operations ~
+
+							*sm.create()*
+sm.create([title])
+	Create a new memo with optional title. If title is nil, prompts user.
+
+							*sm.open-last()*
+sm.open-last()
+	Open the last edited memo.
+
+							*sm.list()*
+sm.list()
+	Open Telescope memo picker.
+
+							*sm.grep()*
+sm.grep()
+	Search memo contents using Telescope live grep.
+
+Tag Operations ~
+
+							*sm.tags()*
+sm.tags()
+	Browse memos by tag using Telescope.
+
+							*sm.search-by-tag()*
+sm.search-by-tag([tag])
+	List all memos with a specific tag. If tag is nil, prompts user.
+
+							*sm.list-all-tags()*
+sm.list-all-tags()
+	Get all tags as a list. Useful for custom completion.
+
+							*sm.add-tag()*
+sm.add-tag([tag])
+	Add a tag to the current memo's frontmatter.
+
+Link Operations ~
+
+							*sm.follow-link()*
+sm.follow-link()
+	Follow wiki link under cursor.
+
+							*sm.insert-link()*
+sm.insert-link()
+	Insert a wiki link using Telescope picker.
+
+------------------------------------------------------------------------------
+MAPPINGS						*sm-mappings*
+
+|sm.nvim| sets up a single buffer-local mapping automatically:
+
+	`gf`	Follow wiki link under cursor (in memo buffers only)
+
+This mapping is set via `BufEnter` autocommand for files in the memos
+directory.
+
+Example user keymaps:
+	>
+	local sm = require("sm")
+
+	vim.keymap.set("n", "<Leader>mn", sm.create,
+		{ desc = "[sm] New memo" })
+	vim.keymap.set("n", "<Leader>ml", sm.list,
+		{ desc = "[sm] List all memos" })
+	vim.keymap.set("n", "<Leader>mg", sm.grep,
+		{ desc = "[sm] Grep contents" })
+	vim.keymap.set("n", "<Leader>mt", sm.tags,
+		{ desc = "[sm] Browse by tag" })
+	vim.keymap.set("n", "<Leader>ms", sm["search-by-tag"],
+		{ desc = "[sm] Search by tag" })
+	vim.keymap.set("n", "<Leader>mo", sm["open-last"],
+		{ desc = "[sm] Open last edited" })
+	vim.keymap.set("n", "<Leader>mi", sm["insert-link"],
+		{ desc = "[sm] Insert link" })
+	vim.keymap.set("n", "<Leader>ma", sm["add-tag"],
+		{ desc = "[sm] Add tag" })
+	<
+
+------------------------------------------------------------------------------
+OPTIONS							*sm-options*
+
+							*sm.setup()*
+sm.setup([opts])
+	Setup function to configure the plugin.
+
+Default options:
+	>
+	{
+		["memos-dir"] = "~/.cache/nvim/sm/memos",
+		["state-file"] = "~/.cache/nvim/sm/state.json",
+		["date-format"] = "%Y%m%d_%H%M%S",
+
+		template = {
+			"---",
+			"tags: []",
+			"created: %date%",
+			"---",
+			"",
+			"# %title%",
+			""
+		},
+
+		window = {
+			width = 80,
+			height = 30,
+			border = "rounded",
+			style = "minimal"
+		}
+	}
+	<
+
+Options:
+
+	memos-dir ~
+		Directory where memos are stored.
+		Default: `~/.cache/nvim/sm/memos`
+
+	state-file ~
+		JSON file for persistent state (last edited, recent memos).
+		Default: `~/.cache/nvim/sm/state.json`
+
+	date-format ~
+		Format string for timestamp in filenames (see `os.date()`).
+		Default: `%Y%m%d_%H%M%S`
+
+	template ~
+		List of lines for new memo template. Supports variables:
+		- `%date%` - ISO 8601 timestamp (e.g., `2026-01-17T14:30:52`)
+		- `%title%` - Memo title
+
+	window ~
+		Floating window configuration:
+		- `width` - Window width (default: 80)
+		- `height` - Window height (default: 30)
+		- `border` - Border style (default: "rounded")
+		- `style` - Window style (default: "minimal")
+
+==============================================================================
+MEMO FORMAT						*sm-memo-format*
+
+Memo files are stored with timestamped filenames:
+	>
+	20260117_143052_meeting-notes.md
+	<
+
+The filename format is: `{date-format}_{sanitized-title}.md`
+
+Title sanitization:
+- Converted to lowercase
+- Special characters removed
+- Spaces replaced with hyphens
+
+------------------------------------------------------------------------------
+FRONTMATTER						*sm-frontmatter*
+
+Each memo begins with YAML frontmatter:
+	>
+	---
+	tags: [work, ideas, important]
+	created: 2026-01-17T14:30:52
+	---
+	<
+
+Fields:
+
+	tags ~
+		List of tags for categorization. Can be empty: `tags: []`
+
+	created ~
+		ISO 8601 timestamp when memo was created.
+
+------------------------------------------------------------------------------
+WIKI LINKS						*sm-wiki-links*
+
+Link syntax:
+	>
+	[[memo-name]]
+	<
+
+Link matching:
+- Case-insensitive
+- Partial filename matching (substring)
+- Example: `[[project]]` matches `20260115_project-ideas.md`
+
+Auto-creation:
+- If the target memo does not exist, following the link will create it.
+
+Navigation:
+- Press `gf` on a link to follow it
+- Use `:SmFollowLink` command
+
+Insert links:
+- Use `:SmInsertLink` or `sm.insert-link()` to pick from existing memos
+
+==============================================================================
+EXAMPLES						*sm-examples*
+
+Minimal setup:
+	>
+	require("sm").setup()
+	<
+
+Custom memos directory:
+	>
+	require("sm").setup({
+		["memos-dir"] = vim.fn.expand("~/Documents/memos"),
+	})
+	<
+
+Complete setup with keymaps:
+	>
+	local sm = require("sm")
+
+	sm.setup({
+		["memos-dir"] = "~/.local/share/nvim/memos",
+		window = {
+			width = 100,
+			height = 40,
+			border = "double",
+		},
+	})
+
+	vim.keymap.set("n", "<Leader>mn", sm.create,
+		{ desc = "[sm] New memo" })
+	vim.keymap.set("n", "<Leader>ml", sm.list,
+		{ desc = "[sm] List all memos" })
+	vim.keymap.set("n", "<Leader>mg", sm.grep,
+		{ desc = "[sm] Grep contents" })
+	vim.keymap.set("n", "<Leader>mt", sm.tags,
+		{ desc = "[sm] Browse by tag" })
+	vim.keymap.set("n", "<Leader>ms", sm["search-by-tag"],
+		{ desc = "[sm] Search by tag" })
+	vim.keymap.set("n", "<Leader>mo", sm["open-last"],
+		{ desc = "[sm] Open last edited" })
+	vim.keymap.set("n", "<Leader>mi", sm["insert-link"],
+		{ desc = "[sm] Insert wiki link" })
+	vim.keymap.set("n", "<Leader>ma", sm["add-tag"],
+		{ desc = "[sm] Add tag to current memo" })
+	<
+
+Custom template:
+	>
+	require("sm").setup({
+		template = {
+			"---",
+			"tags: []",
+			"created: %date%",
+			"status: draft",
+			"---",
+			"",
+			"# %title%",
+			"",
+			"## Summary",
+			"",
+			"## Details",
+			""
+		},
+	})
+	<
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
