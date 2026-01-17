@@ -13,4 +13,11 @@ lua/sm:
 clean:
 	rm -rf lua/
 
-.PHONY: all clean
+test:
+	@for f in fnl/sm/*_test.fnl; do \
+		echo "=== Running $$f ===" && \
+		fennel "$$f" || exit 1; \
+	done
+	@echo "=== All tests passed ==="
+
+.PHONY: all clean test

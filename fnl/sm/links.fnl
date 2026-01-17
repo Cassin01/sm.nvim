@@ -118,25 +118,4 @@
         (fn [] (M.follow-link))
         {:buffer buf :desc "Follow wiki link"}))))
 
-;;; test (run with: fennel fnl/sm/links.fnl)
-
-(local (method-name) ...)
-(when (= method-name nil)
-  ;; Test parse-link with valid links
-  (assert (= (M.parse-link "[[memo-name]]") "memo-name") "parse: simple link")
-  (assert (= (M.parse-link "[[20260117_test]]") "20260117_test") "parse: timestamp link")
-  (assert (= (M.parse-link "text [[link]] more") "link") "parse: link in text")
-  (assert (= (M.parse-link "[[my memo title]]") "my memo title") "parse: link with spaces")
-
-  ;; Test parse-link with invalid/no links
-  (assert (= (M.parse-link "no link here") nil) "parse: no link")
-  (assert (= (M.parse-link "[single bracket]") nil) "parse: single brackets")
-  (assert (= (M.parse-link "[[]]") nil) "parse: empty link")
-  (assert (= (M.parse-link "[[unclosed") nil) "parse: unclosed link")
-
-  ;; Test parse-link with multiple links (returns first)
-  (assert (= (M.parse-link "[[first]] and [[second]]") "first") "parse: multiple links")
-
-  (print "links.fnl: All tests passed"))
-
 M

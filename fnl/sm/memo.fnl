@@ -129,32 +129,7 @@
      :date date-part
      :title (title-part:gsub "-" " ")}))
 
-;;; test (run with: fennel fnl/sm/memo.fnl)
-
-(local (method-name) ...)
-(when (= method-name nil)
-  ;; Test sanitize-title
-  (assert (= (sanitize-title "Hello World!") "hello-world") "sanitize: spaces and punctuation")
-  (assert (= (sanitize-title "  Test  ") "test") "sanitize: trim whitespace")
-  (assert (= (sanitize-title "My--Title") "my-title") "sanitize: collapse dashes")
-  (assert (= (sanitize-title "CamelCase") "camelcase") "sanitize: lowercase")
-
-  ;; Test generate-filename format
-  (let [filename (M.generate-filename "test")]
-    (assert (filename:match "^%d+_%d+_test%.md$") "filename: format YYYYMMDD_HHMMSS_title.md"))
-
-  ;; Test generate-template
-  (let [content (M.generate-template "Test Title")]
-    (assert (content:match "^%-%-%-") "template: starts with frontmatter")
-    (assert (content:match "tags: %[%]") "template: has empty tags")
-    (assert (content:match "# Test Title") "template: has title heading"))
-
-  ;; Test get-memo-info
-  (let [info (M.get-memo-info "/path/to/20260117_143052_my-memo.md")]
-    (assert (= info.filename "20260117_143052_my-memo.md") "info: filename")
-    (assert (= info.date "20260117_143052") "info: date")
-    (assert (= info.title "my memo") "info: title with spaces"))
-
-  (print "memo.fnl: All tests passed"))
+;; Export for testing
+(tset M :_sanitize-title sanitize-title)
 
 M
