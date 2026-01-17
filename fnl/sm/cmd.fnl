@@ -1,64 +1,53 @@
 ;;; sm/cmd.fnl - User commands for sm.nvim
 
-(import-macros {: la} :kaza.macros)
-(local {: u-cmd} (require :kaza))
+(local M {})
 
-(u-cmd
-  :SmOpen
-  (la ((. (require :sm) :open-last)))
-  {:desc "Open last edited memo"})
+(fn M.setup []
+  "Register all sm.nvim commands"
 
-(u-cmd
-  :SmNew
-  (λ [opts]
-    (let [sm (require :sm)
-          title (if (and opts.args (> (length opts.args) 0))
-                  opts.args
-                  nil)]
-      (sm.create title)))
-  {:nargs "?"
-   :desc "Create new memo"})
+  (vim.api.nvim_create_user_command :SmOpen
+    (fn [] ((. (require :sm) :open-last)))
+    {:desc "Open last edited memo"})
 
-(u-cmd
-  :SmList
-  (la ((. (require :sm) :list)))
-  {:desc "List all memos"})
+  (vim.api.nvim_create_user_command :SmNew
+    (fn [opts]
+      (let [sm (require :sm)
+            title (when (and opts.args (> (length opts.args) 0)) opts.args)]
+        (sm.create title)))
+    {:nargs "?" :desc "Create new memo"})
 
-(u-cmd
-  :SmGrep
-  (la ((. (require :sm) :grep)))
-  {:desc "Search memo contents"})
+  (vim.api.nvim_create_user_command :SmList
+    (fn [] ((. (require :sm) :list)))
+    {:desc "List all memos"})
 
-(u-cmd
-  :SmTags
-  (la ((. (require :sm) :tags)))
-  {:desc "Browse memos by tag"})
+  (vim.api.nvim_create_user_command :SmGrep
+    (fn [] ((. (require :sm) :grep)))
+    {:desc "Search memo contents"})
 
-(u-cmd
-  :SmTagSearch
-  (λ [opts]
-    ((. (require :sm) :search-by-tag) opts.args))
-  {:nargs 1
-   :complete (la ((. (require :sm) :list-all-tags)))
-   :desc "Search memos by tag"})
+  (vim.api.nvim_create_user_command :SmTags
+    (fn [] ((. (require :sm) :tags)))
+    {:desc "Browse memos by tag"})
 
-(u-cmd
-  :SmAddTag
-  (λ [opts]
-    (let [tag (if (and opts.args (> (length opts.args) 0))
-                opts.args
-                nil)]
-      ((. (require :sm) :add-tag) tag)))
-  {:nargs "?"
-   :complete (la ((. (require :sm) :list-all-tags)))
-   :desc "Add tag to current memo"})
+  (vim.api.nvim_create_user_command :SmTagSearch
+    (fn [opts] ((. (require :sm) :search-by-tag) opts.args))
+    {:nargs 1
+     :complete (fn [] ((. (require :sm) :list-all-tags)))
+     :desc "Search memos by tag"})
 
-(u-cmd
-  :SmFollowLink
-  (la ((. (require :sm) :follow-link)))
-  {:desc "Follow wiki link under cursor"})
+  (vim.api.nvim_create_user_command :SmAddTag
+    (fn [opts]
+      (let [tag (when (and opts.args (> (length opts.args) 0)) opts.args)]
+        ((. (require :sm) :add-tag) tag)))
+    {:nargs "?"
+     :complete (fn [] ((. (require :sm) :list-all-tags)))
+     :desc "Add tag to current memo"})
 
-(u-cmd
-  :SmInsertLink
-  (la ((. (require :sm) :insert-link)))
-  {:desc "Insert wiki link from picker"})
+  (vim.api.nvim_create_user_command :SmFollowLink
+    (fn [] ((. (require :sm) :follow-link)))
+    {:desc "Follow wiki link under cursor"})
+
+  (vim.api.nvim_create_user_command :SmInsertLink
+    (fn [] ((. (require :sm) :insert-link)))
+    {:desc "Insert wiki link from picker"}))
+
+M

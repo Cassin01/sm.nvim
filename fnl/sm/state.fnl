@@ -23,10 +23,14 @@
   "Write data as JSON to file"
   (ensure-dir (vim.fn.fnamemodify filepath ":h"))
   (let [(file err) (io.open filepath :w)]
-    (when file
-      (file:write (vim.fn.json_encode data))
-      (file:close)
-      true)))
+    (if file
+      (do
+        (file:write (vim.fn.json_encode data))
+        (file:close)
+        true)
+      (do
+        (vim.notify (.. "Failed to save state: " (or err "unknown error")) vim.log.levels.ERROR)
+        false))))
 
 (fn M.load []
   "Load state from file"

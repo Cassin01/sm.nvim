@@ -2,9 +2,7 @@ local M = {}
 local defaults = {["memos-dir"] = nil, ["state-file"] = nil, ["date-format"] = "%Y%m%d_%H%M%S", template = {"---", "tags: []", "created: %date%", "---", "", "# %title%", ""}, window = {width = 80, height = 30, border = "rounded", style = "minimal"}}
 local config = nil
 M["get-base-dir"] = function()
-  local _let_1_ = require("kaza.file")
-  local nvim_cache = _let_1_["nvim-cache"]
-  return (nvim_cache() .. "/sm")
+  return (vim.fn.stdpath("cache") .. "/sm")
 end
 M["get-memos-dir"] = function()
   local cfg = M.get()
@@ -31,6 +29,11 @@ M.get = function()
     M.setup({})
   else
   end
-  return config
+  return vim.deepcopy(config)
 end
+M.reset = function()
+  config = nil
+  return nil
+end
+M["_reset"] = M.reset
 return M

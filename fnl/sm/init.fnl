@@ -4,9 +4,10 @@
 
 (fn M.setup [?opts]
   "Initialize sm.nvim with optional configuration"
-  (let [config (require :sm.config)]
+  (let [config (require :sm.config)
+        cmd (require :sm.cmd)]
     (config.setup ?opts)
-    (require :sm.cmd)
+    (cmd.setup)
     (M.setup-autocmds)))
 
 (fn M.setup-autocmds []

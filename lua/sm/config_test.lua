@@ -1,6 +1,17 @@
 package.path = ("./lua/?.lua;" .. package.path)
 if not _G.vim then
-  local function _1_(_, t1, t2)
+  local function deepcopy(t)
+    if (type(t) == "table") then
+      local copy = {}
+      for k, v in pairs(t) do
+        copy[k] = deepcopy(v)
+      end
+      return copy
+    else
+      return t
+    end
+  end
+  local function _2_(_, t1, t2)
     local result = {}
     for k, v in pairs(t1) do
       result[k] = v
@@ -10,13 +21,12 @@ if not _G.vim then
     end
     return result
   end
-  _G.vim = {tbl_deep_extend = _1_}
+  local function _3_(which)
+    return "/tmp/test-nvim-cache"
+  end
+  _G.vim = {tbl_deep_extend = _2_, deepcopy = deepcopy, fn = {stdpath = _3_}}
 else
 end
-local function _3_()
-  return "/tmp/test-nvim-cache"
-end
-package.loaded["kaza.file"] = {["nvim-cache"] = _3_}
 local M = require("sm.config")
 M.setup({})
 do

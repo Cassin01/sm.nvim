@@ -29,7 +29,8 @@ local function write_json(filepath, data)
     file:close()
     return true
   else
-    return nil
+    vim.notify(("Failed to save state: " .. (err or "unknown error")), vim.log.levels.ERROR)
+    return false
   end
 end
 M.load = function()

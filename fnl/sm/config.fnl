@@ -22,8 +22,7 @@
 
 (fn M.get-base-dir []
   "Get base sm directory (~/.cache/nvim/sm)"
-  (let [{: nvim-cache} (require :kaza.file)]
-    (.. (nvim-cache) "/sm")))
+  (.. (vim.fn.stdpath :cache) "/sm"))
 
 (fn M.get-memos-dir []
   "Get memos directory path"
@@ -45,9 +44,16 @@
   config)
 
 (fn M.get []
-  "Get current configuration, initialize with defaults if needed"
+  "Get current configuration (returns a deep copy), initialize with defaults if needed"
   (when (= config nil)
     (M.setup {}))
-  config)
+  (vim.deepcopy config))
+
+(fn M.reset []
+  "Reset configuration to nil (for testing/reloading)"
+  (set config nil))
+
+;; Export for testing
+(tset M :_reset M.reset)
 
 M

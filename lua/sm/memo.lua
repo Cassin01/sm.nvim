@@ -31,6 +31,23 @@ end
 M["get-filepath"] = function(filename)
   return (config["get-memos-dir"]() .. "/" .. filename)
 end
+local function try_attach_copilot(attempts)
+  local max_attempts = 3
+  local delay = (attempts * 100)
+  local function _2_()
+    local ok, err
+    local function _3_()
+      return require("copilot.command").attach({force = true})
+    end
+    ok, err = pcall(_3_)
+    if (not ok and (attempts < max_attempts)) then
+      return try_attach_copilot((attempts + 1))
+    else
+      return nil
+    end
+  end
+  return vim.defer_fn(_2_, delay)
+end
 M["open-in-window"] = function(filepath, _3fopts)
   local cfg = config.get()
   local opts = (_3fopts or {})
@@ -38,16 +55,10 @@ M["open-in-window"] = function(filepath, _3fopts)
   local height = (opts.height or cfg.window.height)
   local buf = vim.fn.bufadd(filepath)
   vim.fn.bufload(buf)
-  vim.api.nvim_buf_set_option(buf, "filetype", "markdown")
+  vim.bo[buf]["filetype"] = "markdown"
   vim.api.nvim_open_win(buf, true, {relative = "editor", style = cfg.window.style, border = cfg.window.border, row = 3, col = (vim.o.columns - width - 2), height = height, width = width})
   vim.wo["wrap"] = true
-  local function _2_()
-    local function _3_()
-      return require("copilot.command").attach({force = true})
-    end
-    return pcall(_3_)
-  end
-  vim.defer_fn(_2_, 150)
+  try_attach_copilot(1)
   return buf
 end
 M.create = function(_3ftitle)
@@ -62,6 +73,7 @@ M.create = function(_3ftitle)
         file:write(content)
         file:close()
       else
+        vim.notify(("Failed to create memo: " .. (err or "unknown error")), vim.log.levels.ERROR)
       end
     end
     M["open-in-window"](filepath)
@@ -69,14 +81,14 @@ M.create = function(_3ftitle)
     state["add-recent"](filename)
     return filepath
   else
-    local function _5_(input)
+    local function _6_(input)
       if (input and (#input > 0)) then
         return M.create(input)
       else
         return nil
       end
     end
-    return vim.ui.input({prompt = "Memo title: "}, _5_)
+    return vim.ui.input({prompt = "Memo title: "}, _6_)
   end
 end
 M.open = function(filepath)
@@ -98,10 +110,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config["get-memos-dir"]()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _9_(a, b)
+  local function _10_(a, b)
     return (a > b)
   end
-  table.sort(files, _9_)
+  table.sort(files, _10_)
   return files
 end
 M.delete = function(filepath)

@@ -1,6 +1,17 @@
 package.path = ("./lua/?.lua;" .. package.path)
 if not _G.vim then
-  local function _1_(_, t1, t2)
+  local function deepcopy(t)
+    if (type(t) == "table") then
+      local copy = {}
+      for k, v in pairs(t) do
+        copy[k] = deepcopy(v)
+      end
+      return copy
+    else
+      return t
+    end
+  end
+  local function _2_(_, t1, t2)
     local result = {}
     for k, v in pairs(t1) do
       result[k] = v
@@ -10,16 +21,15 @@ if not _G.vim then
     end
     return result
   end
-  local function _2_(str, prefix)
+  local function _3_(str, prefix)
     return (str:sub(1, #prefix) == prefix)
   end
-  _G.vim = {tbl_deep_extend = _1_, startswith = _2_}
+  local function _4_(which)
+    return "/tmp/test-nvim-cache"
+  end
+  _G.vim = {tbl_deep_extend = _2_, deepcopy = deepcopy, startswith = _3_, fn = {stdpath = _4_}}
 else
 end
-local function _4_()
-  return "/tmp/test-nvim-cache"
-end
-package.loaded["kaza.file"] = {["nvim-cache"] = _4_}
 local M = require("sm.links")
 assert((M["parse-link"]("[[memo-name]]") == "memo-name"), "parse: simple link")
 assert((M["parse-link"]("[[20260117_test]]") == "20260117_test"), "parse: timestamp link")

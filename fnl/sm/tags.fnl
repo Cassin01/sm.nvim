@@ -3,6 +3,19 @@
 (local M {})
 (local config (require :sm.config))
 
+;; Tag index cache
+(var tags-cache nil)
+(var cache-timestamp 0)
+(local cache-ttl 30)  ; 30 seconds TTL
+
+(fn cache-valid? []
+  "Check if cache is still valid"
+  (and tags-cache (< (- (os.time) cache-timestamp) cache-ttl)))
+
+(fn M.invalidate-cache []
+  "Force cache invalidation (call after modifying tags)"
+  (set tags-cache nil))
+
 (fn M.parse-frontmatter [content]
   "Parse YAML frontmatter and extract metadata
    Returns: {:tags [...] :created ... :raw ...}"
@@ -43,19 +56,23 @@
       [])))
 
 (fn M.build-tags-index []
-  "Scan all memos and build tag -> files mapping
+  "Scan all memos and build tag -> files mapping (cached)
    Returns: {:tag1 [file1 file2] :tag2 [file3] ...}"
-  (let [memo (require :sm.memo)
-        files (memo.list)
-        index {}]
-    (each [_ filepath (ipairs files)]
-      (let [tags (M.get-memo-tags filepath)
-            filename (vim.fn.fnamemodify filepath ":t")]
-        (each [_ tag (ipairs tags)]
-          (when (= (. index tag) nil)
-            (tset index tag []))
-          (table.insert (. index tag) filename))))
-    index))
+  (if (cache-valid?)
+    tags-cache
+    (let [memo (require :sm.memo)
+          files (memo.list)
+          index {}]
+      (each [_ filepath (ipairs files)]
+        (let [tags (M.get-memo-tags filepath)
+              filename (vim.fn.fnamemodify filepath ":t")]
+          (each [_ tag (ipairs tags)]
+            (when (= (. index tag) nil)
+              (tset index tag []))
+            (table.insert (. index tag) filename))))
+      (set tags-cache index)
+      (set cache-timestamp (os.time))
+      index)))
 
 (fn M.get-memos-by-tag [tag]
   "Return list of memo filepaths with given tag"
@@ -93,10 +110,15 @@
           (let [new-tags-line (.. "tags: [" (table.concat tags ", ") "]")
                 new-content (content:gsub "tags:%s*%[[^%]]*%]" new-tags-line 1)
                 (file err) (io.open filepath :w)]
-            (when file
-              (file:write new-content)
-              (file:close)
-              true)))))))
+            (if file
+              (do
+                (file:write new-content)
+                (file:close)
+                (M.invalidate-cache)
+                true)
+              (do
+                (vim.notify (.. "Failed to add tag: " (or err "unknown error")) vim.log.levels.ERROR)
+                false))))))))
 
 (fn M.remove-tag-from-memo [filepath tag]
   "Remove tag from memo's frontmatter"
@@ -107,9 +129,14 @@
             new-tags-line (.. "tags: [" (table.concat tags ", ") "]")
             new-content (content:gsub "tags:%s*%[[^%]]*%]" new-tags-line 1)
             (file err) (io.open filepath :w)]
-        (when file
-          (file:write new-content)
-          (file:close)
-          true)))))
+        (if file
+          (do
+            (file:write new-content)
+            (file:close)
+            (M.invalidate-cache)
+            true)
+          (do
+            (vim.notify (.. "Failed to remove tag: " (or err "unknown error")) vim.log.levels.ERROR)
+            false))))))
 
 M
