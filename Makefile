@@ -1,4 +1,4 @@
-LUA_FILES := lua/sm/cmd.lua lua/sm/config.lua lua/sm/init.lua \
+LUA_FILES := lua/sm/api.lua lua/sm/cmd.lua lua/sm/config.lua lua/sm/init.lua \
              lua/sm/links.lua lua/sm/memo.lua lua/sm/state.lua \
              lua/sm/tags.lua lua/sm/telescope.lua
 

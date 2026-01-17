@@ -2,6 +2,11 @@
 
 (local M {})
 
+(fn has-telescope? []
+  "Check if telescope.nvim is available"
+  (let [(ok _) (pcall require :telescope)]
+    ok))
+
 (fn M.setup [?opts]
   "Initialize sm.nvim with optional configuration"
   (let [config (require :sm.config)
@@ -34,24 +39,41 @@
     (memo.open-last)))
 
 (fn M.list []
-  "List all memos using Telescope"
-  (let [telescope (require :sm.telescope)]
-    (telescope.memo-picker)))
+  "List all memos using Telescope (if available)"
+  (if (has-telescope?)
+    (let [telescope (require :sm.telescope)]
+      (telescope.memo-picker))
+    (vim.notify
+      "sm.nvim: Telescope not found. Use require('sm.api').get_memos() with your preferred picker."
+      vim.log.levels.WARN)))
 
 (fn M.grep []
-  "Search memo contents using Telescope"
-  (let [telescope (require :sm.telescope)]
-    (telescope.memo-grep)))
+  "Search memo contents using Telescope (if available)"
+  (if (has-telescope?)
+    (let [telescope (require :sm.telescope)]
+      (telescope.memo-grep))
+    (let [config (require :sm.config)]
+      (vim.notify
+        (.. "sm.nvim: Telescope not found. Use grep in: " (config.get-memos-dir))
+        vim.log.levels.WARN))))
 
 (fn M.tags []
-  "Browse memos by tag using Telescope"
-  (let [telescope (require :sm.telescope)]
-    (telescope.tag-picker)))
+  "Browse memos by tag using Telescope (if available)"
+  (if (has-telescope?)
+    (let [telescope (require :sm.telescope)]
+      (telescope.tag-picker))
+    (vim.notify
+      "sm.nvim: Telescope not found. Use require('sm.api').get_tags() with your preferred picker."
+      vim.log.levels.WARN)))
 
 (fn M.search-by-tag [tag]
   "Search memos with specific tag"
-  (let [telescope (require :sm.telescope)]
-    (telescope.memos-by-tag-picker tag)))
+  (if (has-telescope?)
+    (let [telescope (require :sm.telescope)]
+      (telescope.memos-by-tag-picker tag))
+    (vim.notify
+      "sm.nvim: Telescope not found. Use require('sm.api').get_memos_by_tag(tag) with your preferred picker."
+      vim.log.levels.WARN)))
 
 ;;; Public API - Link operations
 
@@ -62,8 +84,12 @@
 
 (fn M.insert-link []
   "Insert a wiki link by selecting from memos"
-  (let [links (require :sm.links)]
-    (links.insert-link)))
+  (if (has-telescope?)
+    (let [links (require :sm.links)]
+      (links.insert-link))
+    (vim.notify
+      "sm.nvim: Telescope not found. Use require('sm.api').get_memos_for_link() with your preferred picker."
+      vim.log.levels.WARN)))
 
 ;;; Public API - Tag operations
 
