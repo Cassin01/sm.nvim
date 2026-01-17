@@ -6,16 +6,16 @@
   "Get all memos as picker entries.
    Returns: Array of {value=filepath, text=display, ordinal=search, info={...}, tags=[...]}"
   (let [memo (require :sm.memo)
-        tags-mod (require :sm.tags)
+        tags_mod (require :sm.tags)
         files (memo.list)
         entries []]
     (each [_ filepath (ipairs files)]
-      (let [info (memo.get-memo-info filepath)
-            tags (tags-mod.get-memo-tags filepath)
-            tags-str (if (> (length tags) 0)
+      (let [info (memo.get_memo_info filepath)
+            tags (tags_mod.get_memo_tags filepath)
+            tags_str (if (> (length tags) 0)
                        (.. " [" (table.concat tags ", ") "]")
                        "")
-            display (.. info.date " | " info.title tags-str)
+            display (.. info.date " | " info.title tags_str)
             ordinal (.. info.date " " info.title " " (table.concat tags " "))]
         (table.insert entries
           {:value filepath
@@ -28,10 +28,10 @@
 (fn M.get_tags []
   "Get all tags with counts as picker entries.
    Returns: Array of {value=tag, text=display, ordinal=tag, count=n}"
-  (let [tags-mod (require :sm.tags)
-        tags-with-counts (tags-mod.get-tags-with-counts)
+  (let [tags_mod (require :sm.tags)
+        tags_with_counts (tags_mod.get_tags_with_counts)
         entries []]
-    (each [_ item (ipairs tags-with-counts)]
+    (each [_ item (ipairs tags_with_counts)]
       (table.insert entries
         {:value item.tag
          :text (string.format "%-20s (%d memos)" item.tag item.count)
@@ -43,11 +43,11 @@
   "Get memos filtered by tag as picker entries.
    Returns: Array of {value=filepath, text=display, ordinal=search, info={...}}"
   (let [memo (require :sm.memo)
-        tags-mod (require :sm.tags)
-        files (tags-mod.get-memos-by-tag tag)
+        tags_mod (require :sm.tags)
+        files (tags_mod.get_memos_by_tag tag)
         entries []]
     (each [_ filepath (ipairs files)]
-      (let [info (memo.get-memo-info filepath)
+      (let [info (memo.get_memo_info filepath)
             display (.. info.date " | " info.title)
             ordinal (.. info.date " " info.title)]
         (table.insert entries
@@ -64,7 +64,7 @@
         files (memo.list)
         entries []]
     (each [_ filepath (ipairs files)]
-      (let [info (memo.get-memo-info filepath)
+      (let [info (memo.get_memo_info filepath)
             filename (vim.fn.fnamemodify filepath ":t:r")
             display (.. info.date " | " info.title)
             ordinal (.. info.date " " info.title)]
@@ -89,6 +89,6 @@
 (fn M.get_memos_dir []
   "Get the memos directory path. Useful for grep operations."
   (let [config (require :sm.config)]
-    (config.get-memos-dir)))
+    (config.get_memos_dir)))
 
 M

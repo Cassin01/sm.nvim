@@ -34,31 +34,31 @@ local function write_json(filepath, data)
   end
 end
 M.load = function()
-  return read_json(config["get-state-file"]())
+  return read_json(config.get_state_file())
 end
 M.save = function(state)
-  return write_json(config["get-state-file"](), state)
+  return write_json(config.get_state_file(), state)
 end
-M["get-last-edited"] = function()
+M.get_last_edited = function()
   local state = M.load()
   if state.last_edited then
-    return (config["get-memos-dir"]() .. "/" .. state.last_edited)
+    return (config.get_memos_dir() .. "/" .. state.last_edited)
   else
     return nil
   end
 end
-M["set-last-edited"] = function(filename)
+M.set_last_edited = function(filename)
   local state = M.load()
   state["last_edited"] = filename
   state["last_accessed"] = os.time()
   return M.save(state)
 end
-M["get-recent"] = function(_3flimit)
+M.get_recent = function(_3flimit)
   local state = M.load()
   local limit = (_3flimit or 10)
   return (state.recent or {})
 end
-M["add-recent"] = function(filename)
+M.add_recent = function(filename)
   local state = M.load()
   local recent = (state.recent or {})
   local filtered
@@ -73,6 +73,6 @@ M["add-recent"] = function(filename)
   state["recent"] = filtered
   return M.save(state)
 end
-M["_read-json"] = read_json
-M["_write-json"] = write_json
+M["_read_json"] = read_json
+M["_write_json"] = write_json
 return M

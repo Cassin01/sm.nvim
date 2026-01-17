@@ -4,14 +4,14 @@
 (local config (require :sm.config))
 (local state (require :sm.state))
 
-(fn ensure-memos-dir []
+(fn ensure_memos_dir []
   "Create memos directory if it doesn't exist"
-  (let [dir (config.get-memos-dir)]
+  (let [dir (config.get_memos_dir)]
     (when (= (vim.fn.isdirectory dir) 0)
       (vim.fn.mkdir dir :p))
     dir))
 
-(fn sanitize-title [title]
+(fn sanitize_title [title]
   "Convert title to safe filename component"
   (-> title
       (: :lower)
@@ -20,41 +20,41 @@
       (: :gsub "%-+$" "")
       (: :gsub "%-%-+" "-")))
 
-(fn M.generate-filename [title]
+(fn M.generate_filename [title]
   "Generate filename: YYYYMMDD_HHMMSS_{sanitized-title}.md"
   (let [cfg (config.get)
-        date (os.date cfg.date-format)
-        safe-title (sanitize-title title)]
-    (.. date "_" safe-title ".md")))
+        date (os.date cfg.date_format)
+        safe_title (sanitize_title title)]
+    (.. date "_" safe_title ".md")))
 
-(fn M.generate-template [title]
+(fn M.generate_template [title]
   "Generate memo content from template"
   (let [cfg (config.get)
-        date-str (os.date "%Y-%m-%dT%H:%M:%S")
+        date_str (os.date "%Y-%m-%dT%H:%M:%S")
         lines []]
     (each [_ line (ipairs cfg.template)]
       (local processed (-> line
-                          (: :gsub "%%date%%" date-str)
+                          (: :gsub "%%date%%" date_str)
                           (: :gsub "%%title%%" title)))
       (table.insert lines processed))
     (table.concat lines "\n")))
 
-(fn M.get-filepath [filename]
+(fn M.get_filepath [filename]
   "Get full path for a memo filename"
-  (.. (config.get-memos-dir) "/" filename))
+  (.. (config.get_memos_dir) "/" filename))
 
-(fn try-attach-copilot [attempts]
+(fn try_attach_copilot [attempts]
   "Try to attach copilot with exponential backoff"
-  (let [max-attempts 3
+  (let [max_attempts 3
         delay (* attempts 100)]  ; 100ms, 200ms, 300ms
     (vim.defer_fn
       (fn []
         (let [(ok err) (pcall #((. (require :copilot.command) :attach) {:force true}))]
-          (when (and (not ok) (< attempts max-attempts))
-            (try-attach-copilot (+ attempts 1)))))
+          (when (and (not ok) (< attempts max_attempts))
+            (try_attach_copilot (+ attempts 1)))))
       delay)))
 
-(fn M.open-in-window [filepath ?opts]
+(fn M.open_in_window [filepath ?opts]
   "Open file in floating window"
   (let [cfg (config.get)
         opts (or ?opts {})
@@ -72,25 +72,25 @@
        :height height
        :width width})
     (tset vim.wo :wrap true)
-    (try-attach-copilot 1)
+    (try_attach_copilot 1)
     buf))
 
 (fn M.create [?title]
   "Create new memo with optional title"
   (if ?title
-    (let [_ (ensure-memos-dir)
-          filename (M.generate-filename ?title)
-          filepath (M.get-filepath filename)
-          content (M.generate-template ?title)]
+    (let [_ (ensure_memos_dir)
+          filename (M.generate_filename ?title)
+          filepath (M.get_filepath filename)
+          content (M.generate_template ?title)]
       (let [(file err) (io.open filepath :w)]
         (if file
           (do
             (file:write content)
             (file:close))
           (vim.notify (.. "Failed to create memo: " (or err "unknown error")) vim.log.levels.ERROR)))
-      (M.open-in-window filepath)
-      (state.set-last-edited filename)
-      (state.add-recent filename)
+      (M.open_in_window filepath)
+      (state.set_last_edited filename)
+      (state.add_recent filename)
       filepath)
     (vim.ui.input {:prompt "Memo title: "}
       (fn [input]
@@ -100,23 +100,23 @@
 (fn M.open [filepath]
   "Open specific memo"
   (let [filename (vim.fn.fnamemodify filepath ":t")]
-    (M.open-in-window filepath)
-    (state.set-last-edited filename)
-    (state.add-recent filename)))
+    (M.open_in_window filepath)
+    (state.set_last_edited filename)
+    (state.add_recent filename)))
 
-(fn M.open-last []
+(fn M.open_last []
   "Open the last edited memo"
-  (let [last-path (state.get-last-edited)]
-    (if (and last-path (= (vim.fn.filereadable last-path) 1))
-      (M.open last-path)
+  (let [last_path (state.get_last_edited)]
+    (if (and last_path (= (vim.fn.filereadable last_path) 1))
+      (M.open last_path)
       (do
         (vim.notify "No recent memo found. Creating new one..." vim.log.levels.INFO)
         (M.create)))))
 
 (fn M.list []
   "Get list of all memo files sorted by date (newest first)"
-  (ensure-memos-dir)
-  (let [dir (config.get-memos-dir)
+  (ensure_memos_dir)
+  (let [dir (config.get_memos_dir)
         files (vim.fn.glob (.. dir "/*.md") false true)]
     (table.sort files (fn [a b] (> a b)))
     files))
@@ -127,19 +127,19 @@
     (os.remove filepath)
     true))
 
-(fn M.get-memo-info [filepath]
+(fn M.get_memo_info [filepath]
   "Extract memo metadata"
   (let [filename (vim.fn.fnamemodify filepath ":t")
-        date-part (filename:match "^(%d+_%d+)_")
-        title-part (-> filename
+        date_part (filename:match "^(%d+_%d+)_")
+        title_part (-> filename
                       (: :match "^%d+_%d+_(.+)%.md$")
                       (or "untitled"))]
     {:filepath filepath
      :filename filename
-     :date date-part
-     :title (title-part:gsub "-" " ")}))
+     :date date_part
+     :title (title_part:gsub "-" " ")}))
 
 ;; Export for testing
-(tset M :_sanitize-title sanitize-title)
+(tset M :_sanitize_title sanitize_title)
 
 M

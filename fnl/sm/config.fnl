@@ -3,9 +3,9 @@
 (local M {})
 
 (local defaults
-  {:memos-dir nil  ; will be set to ~/.cache/nvim/sm/memos
-   :state-file nil ; will be set to ~/.cache/nvim/sm/state.json
-   :date-format "%Y%m%d_%H%M%S"
+  {:memos_dir nil  ; will be set to ~/.cache/nvim/sm/memos
+   :state_file nil ; will be set to ~/.cache/nvim/sm/state.json
+   :date_format "%Y%m%d_%H%M%S"
    :template ["---"
               "tags: []"
               "created: %date%"
@@ -20,23 +20,23 @@
 
 (var config nil)
 
-(fn M.get-base-dir []
+(fn M.get_base_dir []
   "Get base sm directory (~/.cache/nvim/sm)"
   (.. (vim.fn.stdpath :cache) "/sm"))
 
-(fn M.get-memos-dir []
+(fn M.get_memos_dir []
   "Get memos directory path"
   (let [cfg (M.get)]
-    (if cfg.memos-dir
-      cfg.memos-dir
-      (.. (M.get-base-dir) "/memos"))))
+    (if cfg.memos_dir
+      cfg.memos_dir
+      (.. (M.get_base_dir) "/memos"))))
 
-(fn M.get-state-file []
+(fn M.get_state_file []
   "Get state file path"
   (let [cfg (M.get)]
-    (if cfg.state-file
-      cfg.state-file
-      (.. (M.get-base-dir) "/state.json"))))
+    (if cfg.state_file
+      cfg.state_file
+      (.. (M.get_base_dir) "/state.json"))))
 
 (fn M.setup [?opts]
   "Initialize configuration with optional user overrides"

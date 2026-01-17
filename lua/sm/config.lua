@@ -1,23 +1,23 @@
 local M = {}
-local defaults = {["memos-dir"] = nil, ["state-file"] = nil, ["date-format"] = "%Y%m%d_%H%M%S", template = {"---", "tags: []", "created: %date%", "---", "", "# %title%", ""}, window = {width = 80, height = 30, border = "rounded", style = "minimal"}}
+local defaults = {memos_dir = nil, state_file = nil, date_format = "%Y%m%d_%H%M%S", template = {"---", "tags: []", "created: %date%", "---", "", "# %title%", ""}, window = {width = 80, height = 30, border = "rounded", style = "minimal"}}
 local config = nil
-M["get-base-dir"] = function()
+M.get_base_dir = function()
   return (vim.fn.stdpath("cache") .. "/sm")
 end
-M["get-memos-dir"] = function()
+M.get_memos_dir = function()
   local cfg = M.get()
-  if cfg["memos-dir"] then
-    return cfg["memos-dir"]
+  if cfg.memos_dir then
+    return cfg.memos_dir
   else
-    return (M["get-base-dir"]() .. "/memos")
+    return (M.get_base_dir() .. "/memos")
   end
 end
-M["get-state-file"] = function()
+M.get_state_file = function()
   local cfg = M.get()
-  if cfg["state-file"] then
-    return cfg["state-file"]
+  if cfg.state_file then
+    return cfg.state_file
   else
-    return (M["get-base-dir"]() .. "/state.json")
+    return (M.get_base_dir() .. "/state.json")
   end
 end
 M.setup = function(_3fopts)

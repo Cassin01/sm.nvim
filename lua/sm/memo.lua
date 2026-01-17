@@ -2,7 +2,7 @@ local M = {}
 local config = require("sm.config")
 local state = require("sm.state")
 local function ensure_memos_dir()
-  local dir = config["get-memos-dir"]()
+  local dir = config.get_memos_dir()
   if (vim.fn.isdirectory(dir) == 0) then
     vim.fn.mkdir(dir, "p")
   else
@@ -12,13 +12,13 @@ end
 local function sanitize_title(title)
   return title:lower():gsub("[^%w%-%_]+", "-"):gsub("^%-+", ""):gsub("%-+$", ""):gsub("%-%-+", "-")
 end
-M["generate-filename"] = function(title)
+M.generate_filename = function(title)
   local cfg = config.get()
-  local date = os.date(cfg["date-format"])
+  local date = os.date(cfg.date_format)
   local safe_title = sanitize_title(title)
   return (date .. "_" .. safe_title .. ".md")
 end
-M["generate-template"] = function(title)
+M.generate_template = function(title)
   local cfg = config.get()
   local date_str = os.date("%Y-%m-%dT%H:%M:%S")
   local lines = {}
@@ -28,8 +28,8 @@ M["generate-template"] = function(title)
   end
   return table.concat(lines, "\n")
 end
-M["get-filepath"] = function(filename)
-  return (config["get-memos-dir"]() .. "/" .. filename)
+M.get_filepath = function(filename)
+  return (config.get_memos_dir() .. "/" .. filename)
 end
 local function try_attach_copilot(attempts)
   local max_attempts = 3
@@ -48,7 +48,7 @@ local function try_attach_copilot(attempts)
   end
   return vim.defer_fn(_2_, delay)
 end
-M["open-in-window"] = function(filepath, _3fopts)
+M.open_in_window = function(filepath, _3fopts)
   local cfg = config.get()
   local opts = (_3fopts or {})
   local width = (opts.width or cfg.window.width)
@@ -64,9 +64,9 @@ end
 M.create = function(_3ftitle)
   if _3ftitle then
     local _ = ensure_memos_dir()
-    local filename = M["generate-filename"](_3ftitle)
-    local filepath = M["get-filepath"](filename)
-    local content = M["generate-template"](_3ftitle)
+    local filename = M.generate_filename(_3ftitle)
+    local filepath = M.get_filepath(filename)
+    local content = M.generate_template(_3ftitle)
     do
       local file, err = io.open(filepath, "w")
       if file then
@@ -76,9 +76,9 @@ M.create = function(_3ftitle)
         vim.notify(("Failed to create memo: " .. (err or "unknown error")), vim.log.levels.ERROR)
       end
     end
-    M["open-in-window"](filepath)
-    state["set-last-edited"](filename)
-    state["add-recent"](filename)
+    M.open_in_window(filepath)
+    state.set_last_edited(filename)
+    state.add_recent(filename)
     return filepath
   else
     local function _6_(input)
@@ -93,12 +93,12 @@ M.create = function(_3ftitle)
 end
 M.open = function(filepath)
   local filename = vim.fn.fnamemodify(filepath, ":t")
-  M["open-in-window"](filepath)
-  state["set-last-edited"](filename)
-  return state["add-recent"](filename)
+  M.open_in_window(filepath)
+  state.set_last_edited(filename)
+  return state.add_recent(filename)
 end
-M["open-last"] = function()
-  local last_path = state["get-last-edited"]()
+M.open_last = function()
+  local last_path = state.get_last_edited()
   if (last_path and (vim.fn.filereadable(last_path) == 1)) then
     return M.open(last_path)
   else
@@ -108,7 +108,7 @@ M["open-last"] = function()
 end
 M.list = function()
   ensure_memos_dir()
-  local dir = config["get-memos-dir"]()
+  local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
   local function _10_(a, b)
     return (a > b)
@@ -124,11 +124,11 @@ M.delete = function(filepath)
     return nil
   end
 end
-M["get-memo-info"] = function(filepath)
+M.get_memo_info = function(filepath)
   local filename = vim.fn.fnamemodify(filepath, ":t")
   local date_part = filename:match("^(%d+_%d+)_")
   local title_part = (filename:match("^%d+_%d+_(.+)%.md$") or "untitled")
   return {filepath = filepath, filename = filename, date = date_part, title = title_part:gsub("-", " ")}
 end
-M["_sanitize-title"] = sanitize_title
+M["_sanitize_title"] = sanitize_title
 return M
