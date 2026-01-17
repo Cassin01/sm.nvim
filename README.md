@@ -12,7 +12,7 @@ A memo management module for Neovim with tagging, wiki-style linking, and picker
 
 ## Storage
 
-Memos are stored in `~/.cache/nvim/sm/memos/` (default, configurable via `memos-dir`)
+Memos are stored in `~/.cache/nvim/sm/memos/` (default, configurable via `memos_dir`)
 
 ## Usage
 
@@ -24,9 +24,9 @@ This plugin does not set any keymaps by default. Here's an example configuration
 local sm = require("sm")
 
 vim.keymap.set("n", "<Leader>mn", sm.create, { desc = "[sm] New memo with timestamp" })
-vim.keymap.set("n", "<Leader>mo", sm["open-last"], { desc = "[sm] Open last edited" })
-vim.keymap.set("n", "<Leader>mf", sm["follow-link"], { desc = "[sm] Follow wiki link under cursor" })
-vim.keymap.set("n", "<Leader>ma", sm["add-tag"], { desc = "[sm] Add tag to current memo" })
+vim.keymap.set("n", "<Leader>mo", sm.open_last, { desc = "[sm] Open last edited" })
+vim.keymap.set("n", "<Leader>mf", sm.follow_link, { desc = "[sm] Follow wiki link under cursor" })
+vim.keymap.set("n", "<Leader>ma", sm.add_tag, { desc = "[sm] Add tag to current memo" })
 ```
 
 ### Commands
@@ -63,7 +63,7 @@ Links match by partial filename (case-insensitive).
 ```lua
 local sm = require("sm")
 sm.setup({
-  ["memos-dir"] = "~/.cache/nvim/sm/memos",
+  memos_dir = "~/.cache/nvim/sm/memos",
   window = {
     width = 80,
     height = 30,
@@ -431,17 +431,17 @@ end, { desc = "Insert link" })
 | Function | Description |
 |----------|-------------|
 | `sm.create(?title)` | Create new memo |
-| `sm["open-last"]()` | Open last edited memo |
+| `sm.open_last()` | Open last edited memo |
 
 ### Tag Operations
 
 | Function | Description |
 |----------|-------------|
-| `sm["list-all-tags"]()` | Get all tags (for completion) |
-| `sm["add-tag"](?tag)` | Add tag to current memo |
+| `sm.list_all_tags()` | Get all tags (for completion) |
+| `sm.add_tag(?tag)` | Add tag to current memo |
 
 ### Link Operations
 
 | Function | Description |
 |----------|-------------|
-| `sm["follow-link"]()` | Follow wiki link under cursor |
+| `sm.follow_link()` | Follow wiki link under cursor |

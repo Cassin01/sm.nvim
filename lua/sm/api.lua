@@ -5,8 +5,8 @@ M.get_memos = function()
   local files = memo.list()
   local entries = {}
   for _, filepath in ipairs(files) do
-    local info = memo["get-memo-info"](filepath)
-    local tags = tags_mod["get-memo-tags"](filepath)
+    local info = memo.get_memo_info(filepath)
+    local tags = tags_mod.get_memo_tags(filepath)
     local tags_str
     if (#tags > 0) then
       tags_str = (" [" .. table.concat(tags, ", ") .. "]")
@@ -21,7 +21,7 @@ M.get_memos = function()
 end
 M.get_tags = function()
   local tags_mod = require("sm.tags")
-  local tags_with_counts = tags_mod["get-tags-with-counts"]()
+  local tags_with_counts = tags_mod.get_tags_with_counts()
   local entries = {}
   for _, item in ipairs(tags_with_counts) do
     table.insert(entries, {value = item.tag, text = string.format("%-20s (%d memos)", item.tag, item.count), ordinal = item.tag, count = item.count})
@@ -31,10 +31,10 @@ end
 M.get_memos_by_tag = function(tag)
   local memo = require("sm.memo")
   local tags_mod = require("sm.tags")
-  local files = tags_mod["get-memos-by-tag"](tag)
+  local files = tags_mod.get_memos_by_tag(tag)
   local entries = {}
   for _, filepath in ipairs(files) do
-    local info = memo["get-memo-info"](filepath)
+    local info = memo.get_memo_info(filepath)
     local display = (info.date .. " | " .. info.title)
     local ordinal = (info.date .. " " .. info.title)
     table.insert(entries, {value = filepath, text = display, ordinal = ordinal, info = info})
@@ -46,7 +46,7 @@ M.get_memos_for_link = function()
   local files = memo.list()
   local entries = {}
   for _, filepath in ipairs(files) do
-    local info = memo["get-memo-info"](filepath)
+    local info = memo.get_memo_info(filepath)
     local filename = vim.fn.fnamemodify(filepath, ":t:r")
     local display = (info.date .. " | " .. info.title)
     local ordinal = (info.date .. " " .. info.title)
@@ -64,6 +64,6 @@ M.insert_link = function(filename)
 end
 M.get_memos_dir = function()
   local config = require("sm.config")
-  return config["get-memos-dir"]()
+  return config.get_memos_dir()
 end
 return M

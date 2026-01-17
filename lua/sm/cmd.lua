@@ -1,7 +1,7 @@
 local M = {}
 M.setup = function()
   local function _1_()
-    return require("sm")["open-last"]()
+    return require("sm").open_last()
   end
   vim.api.nvim_create_user_command("SmOpen", _1_, {desc = "Open last edited memo"})
   local function _2_(opts)
@@ -22,14 +22,14 @@ M.setup = function()
     else
       tag = nil
     end
-    return require("sm")["add-tag"](tag)
+    return require("sm").add_tag(tag)
   end
   local function _6_()
-    return require("sm")["list-all-tags"]()
+    return require("sm").list_all_tags()
   end
   vim.api.nvim_create_user_command("SmAddTag", _4_, {nargs = "?", complete = _6_, desc = "Add tag to current memo"})
   local function _7_()
-    return require("sm")["follow-link"]()
+    return require("sm").follow_link()
   end
   return vim.api.nvim_create_user_command("SmFollowLink", _7_, {desc = "Follow wiki link under cursor"})
 end

@@ -117,16 +117,16 @@ else
 end
 local M = require("sm.state")
 do
-  local result = M["_read-json"]("/tmp/sm_nonexistent_test.json")
+  local result = M._read_json("/tmp/sm_nonexistent_test.json")
   assert((type(result) == "table"), "read: returns table for missing file")
   assert((next(result) == nil), "read: returns empty table")
 end
 do
   local test_file = "/tmp/sm_test_state.json"
   local data = {test = "value", num = 42, nested = {a = 1}}
-  assert(M["_write-json"](test_file, data), "write: returns true on success")
+  assert(M._write_json(test_file, data), "write: returns true on success")
   do
-    local loaded = M["_read-json"](test_file)
+    local loaded = M._read_json(test_file)
     assert((loaded.test == "value"), "roundtrip: string value")
     assert((loaded.num == 42), "roundtrip: number value")
     assert((loaded.nested.a == 1), "roundtrip: nested value")
@@ -136,9 +136,9 @@ end
 do
   local test_file = "/tmp/sm_test_dir/nested/state.json"
   local data = {created = true}
-  M["_write-json"](test_file, data)
+  M._write_json(test_file, data)
   do
-    local loaded = M["_read-json"](test_file)
+    local loaded = M._read_json(test_file)
     assert((loaded.created == true), "write: creates nested dirs")
   end
   os.remove(test_file)
@@ -149,7 +149,7 @@ do
   local file = io.open(test_file, "w")
   file:close()
   do
-    local result = M["_read-json"](test_file)
+    local result = M._read_json(test_file)
     assert((type(result) == "table"), "read: handles empty file")
   end
   os.remove(test_file)

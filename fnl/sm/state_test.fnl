@@ -80,35 +80,35 @@
 
 (local M (require :sm.state))
 
-;; Test read-json with non-existent file
-(let [result (M._read-json "/tmp/sm_nonexistent_test.json")]
+;; Test read_json with non-existent file
+(let [result (M._read_json "/tmp/sm_nonexistent_test.json")]
   (assert (= (type result) "table") "read: returns table for missing file")
   (assert (= (next result) nil) "read: returns empty table"))
 
-;; Test write-json / read-json roundtrip
+;; Test write_json / read-json roundtrip
 (let [test-file "/tmp/sm_test_state.json"
       data {:test "value" :num 42 :nested {:a 1}}]
-  (assert (M._write-json test-file data) "write: returns true on success")
-  (let [loaded (M._read-json test-file)]
+  (assert (M._write_json test-file data) "write: returns true on success")
+  (let [loaded (M._read_json test-file)]
     (assert (= loaded.test "value") "roundtrip: string value")
     (assert (= loaded.num 42) "roundtrip: number value")
     (assert (= loaded.nested.a 1) "roundtrip: nested value"))
   (os.remove test-file))
 
-;; Test write-json creates directory
+;; Test write_json creates directory
 (let [test-file "/tmp/sm_test_dir/nested/state.json"
       data {:created true}]
-  (M._write-json test-file data)
-  (let [loaded (M._read-json test-file)]
+  (M._write_json test-file data)
+  (let [loaded (M._read_json test-file)]
     (assert (= loaded.created true) "write: creates nested dirs"))
   (os.remove test-file)
   (os.execute "rm -rf /tmp/sm_test_dir"))
 
-;; Test read-json with empty file
+;; Test read_json with empty file
 (let [test-file "/tmp/sm_empty_test.json"
       (file) (io.open test-file :w)]
   (file:close)
-  (let [result (M._read-json test-file)]
+  (let [result (M._read_json test-file)]
     (assert (= (type result) "table") "read: handles empty file"))
   (os.remove test-file))
 

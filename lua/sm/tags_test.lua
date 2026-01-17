@@ -30,7 +30,7 @@ end
 local M = require("sm.tags")
 do
   local content = "---\ntags: [work, ideas]\ncreated: 2026-01-17\n---\n# Test"
-  local result = M["parse-frontmatter"](content)
+  local result = M.parse_frontmatter(content)
   assert((#result.tags == 2), "parse: tag count")
   assert((result.tags[1] == "work"), "parse: first tag")
   assert((result.tags[2] == "ideas"), "parse: second tag")
@@ -38,17 +38,17 @@ do
 end
 do
   local content = "---\ntags: []\ncreated: 2026-01-17\n---\n# Test"
-  local result = M["parse-frontmatter"](content)
+  local result = M.parse_frontmatter(content)
   assert((#result.tags == 0), "parse: empty tags")
 end
 do
-  local result = M["parse-frontmatter"]("No frontmatter here")
+  local result = M.parse_frontmatter("No frontmatter here")
   assert((#result.tags == 0), "parse: no frontmatter")
   assert((result.created == nil), "parse: no created")
 end
 do
   local content = "---\ntags: [ tag1 , tag2 , tag3 ]\n---\n"
-  local result = M["parse-frontmatter"](content)
+  local result = M.parse_frontmatter(content)
   assert((#result.tags == 3), "parse: tags with spaces")
   assert((result.tags[1] == "tag1"), "parse: trimmed tag")
 end

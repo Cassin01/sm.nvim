@@ -6,11 +6,11 @@ local cache_ttl = 30
 local function cache_valid_3f()
   return (tags_cache and ((os.time() - cache_timestamp) < cache_ttl))
 end
-M["invalidate-cache"] = function()
+M.invalidate_cache = function()
   tags_cache = nil
   return nil
 end
-M["parse-frontmatter"] = function(content)
+M.parse_frontmatter = function(content)
   local frontmatter_pattern = "^%-%-%-\n(.-)\n%-%-%-"
   local frontmatter = content:match(frontmatter_pattern)
   if frontmatter then
@@ -32,7 +32,7 @@ M["parse-frontmatter"] = function(content)
     return {tags = {}, created = nil, raw = nil}
   end
 end
-M["read-file-content"] = function(filepath)
+M.read_file_content = function(filepath)
   local file, err = io.open(filepath, "r")
   if file then
     local content = file:read("*all")
@@ -42,15 +42,15 @@ M["read-file-content"] = function(filepath)
     return nil
   end
 end
-M["get-memo-tags"] = function(filepath)
-  local content = M["read-file-content"](filepath)
+M.get_memo_tags = function(filepath)
+  local content = M.read_file_content(filepath)
   if content then
-    return M["parse-frontmatter"](content).tags
+    return M.parse_frontmatter(content).tags
   else
     return {}
   end
 end
-M["build-tags-index"] = function()
+M.build_tags_index = function()
   if cache_valid_3f() then
     return tags_cache
   else
@@ -58,7 +58,7 @@ M["build-tags-index"] = function()
     local files = memo.list()
     local index = {}
     for _, filepath in ipairs(files) do
-      local tags = M["get-memo-tags"](filepath)
+      local tags = M.get_memo_tags(filepath)
       local filename = vim.fn.fnamemodify(filepath, ":t")
       for _0, tag in ipairs(tags) do
         if (index[tag] == nil) then
@@ -73,17 +73,17 @@ M["build-tags-index"] = function()
     return index
   end
 end
-M["get-memos-by-tag"] = function(tag)
-  local index = M["build-tags-index"]()
+M.get_memos_by_tag = function(tag)
+  local index = M.build_tags_index()
   local filenames = (index[tag] or {})
-  local dir = config["get-memos-dir"]()
+  local dir = config.get_memos_dir()
   local function _8_(_241)
     return (dir .. "/" .. _241)
   end
   return vim.tbl_map(_8_, filenames)
 end
-M["list-all-tags"] = function()
-  local index = M["build-tags-index"]()
+M.list_all_tags = function()
+  local index = M.build_tags_index()
   local tags = {}
   for tag, _ in pairs(index) do
     table.insert(tags, tag)
@@ -91,8 +91,8 @@ M["list-all-tags"] = function()
   table.sort(tags)
   return tags
 end
-M["get-tags-with-counts"] = function()
-  local index = M["build-tags-index"]()
+M.get_tags_with_counts = function()
+  local index = M.build_tags_index()
   local result = {}
   for tag, files in pairs(index) do
     table.insert(result, {tag = tag, count = #files})
@@ -103,10 +103,10 @@ M["get-tags-with-counts"] = function()
   table.sort(result, _9_)
   return result
 end
-M["add-tag-to-memo"] = function(filepath, tag)
-  local content = M["read-file-content"](filepath)
+M.add_tag_to_memo = function(filepath, tag)
+  local content = M.read_file_content(filepath)
   if content then
-    local meta = M["parse-frontmatter"](content)
+    local meta = M.parse_frontmatter(content)
     local tags = meta.tags
     if not vim.tbl_contains(tags, tag) then
       table.insert(tags, tag)
@@ -116,7 +116,7 @@ M["add-tag-to-memo"] = function(filepath, tag)
       if file then
         file:write(new_content)
         file:close()
-        M["invalidate-cache"]()
+        M.invalidate_cache()
         return true
       else
         vim.notify(("Failed to add tag: " .. (err or "unknown error")), vim.log.levels.ERROR)
@@ -129,10 +129,10 @@ M["add-tag-to-memo"] = function(filepath, tag)
     return nil
   end
 end
-M["remove-tag-from-memo"] = function(filepath, tag)
-  local content = M["read-file-content"](filepath)
+M.remove_tag_from_memo = function(filepath, tag)
+  local content = M.read_file_content(filepath)
   if content then
-    local meta = M["parse-frontmatter"](content)
+    local meta = M.parse_frontmatter(content)
     local tags
     local function _13_(_241)
       return (_241 ~= tag)
@@ -144,7 +144,7 @@ M["remove-tag-from-memo"] = function(filepath, tag)
     if file then
       file:write(new_content)
       file:close()
-      M["invalidate-cache"]()
+      M.invalidate_cache()
       return true
     else
       vim.notify(("Failed to remove tag: " .. (err or "unknown error")), vim.log.levels.ERROR)
