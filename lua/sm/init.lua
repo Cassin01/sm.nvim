@@ -23,25 +23,9 @@ M["open-last"] = function()
   local memo = require("sm.memo")
   return memo["open-last"]()
 end
-M.list = function()
-  return vim.notify("sm.nvim: Use require('sm.api').get_memos() with your preferred picker.", vim.log.levels.WARN)
-end
-M.grep = function()
-  local config = require("sm.config")
-  return vim.notify(("sm.nvim: Use grep in: " .. config["get-memos-dir"]()), vim.log.levels.WARN)
-end
-M.tags = function()
-  return vim.notify("sm.nvim: Use require('sm.api').get_tags() with your preferred picker.", vim.log.levels.WARN)
-end
-M["search-by-tag"] = function(tag)
-  return vim.notify("sm.nvim: Use require('sm.api').get_memos_by_tag(tag) with your preferred picker.", vim.log.levels.WARN)
-end
 M["follow-link"] = function()
   local links = require("sm.links")
   return links["follow-link"]()
-end
-M["insert-link"] = function()
-  return vim.notify("sm.nvim: Use require('sm.api').get_memos_for_link() with your preferred picker.", vim.log.levels.WARN)
 end
 M["list-all-tags"] = function()
   local tags = require("sm.tags")

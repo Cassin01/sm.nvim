@@ -33,43 +33,12 @@
   (let [memo (require :sm.memo)]
     (memo.open-last)))
 
-(fn M.list []
-  "List all memos - use sm.api with your preferred picker"
-  (vim.notify
-    "sm.nvim: Use require('sm.api').get_memos() with your preferred picker."
-    vim.log.levels.WARN))
-
-(fn M.grep []
-  "Search memo contents - use grep in memos directory"
-  (let [config (require :sm.config)]
-    (vim.notify
-      (.. "sm.nvim: Use grep in: " (config.get-memos-dir))
-      vim.log.levels.WARN)))
-
-(fn M.tags []
-  "Browse memos by tag - use sm.api with your preferred picker"
-  (vim.notify
-    "sm.nvim: Use require('sm.api').get_tags() with your preferred picker."
-    vim.log.levels.WARN))
-
-(fn M.search-by-tag [tag]
-  "Search memos with specific tag - use sm.api with your preferred picker"
-  (vim.notify
-    "sm.nvim: Use require('sm.api').get_memos_by_tag(tag) with your preferred picker."
-    vim.log.levels.WARN))
-
 ;;; Public API - Link operations
 
 (fn M.follow-link []
   "Follow wiki link under cursor"
   (let [links (require :sm.links)]
     (links.follow-link)))
-
-(fn M.insert-link []
-  "Insert a wiki link - use sm.api with your preferred picker"
-  (vim.notify
-    "sm.nvim: Use require('sm.api').get_memos_for_link() with your preferred picker."
-    vim.log.levels.WARN))
 
 ;;; Public API - Tag operations
 
