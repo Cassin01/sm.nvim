@@ -21,7 +21,7 @@ EXAMPLES		|sm-examples|
 ==============================================================================
 INTRODUCTION						*sm-introduction*
 
-|sm.nvim| is a simple memo management plugin for Neovim with tagging,
+sm.nvim is a simple memo management plugin for Neovim with tagging,
 Telescope integration, and wiki-style linking.
 
 Features:
