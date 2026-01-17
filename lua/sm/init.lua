@@ -1,8 +1,4 @@
 local M = {}
-local function has_telescope_3f()
-  local ok, _ = pcall(require, "telescope")
-  return ok
-end
 M.setup = function(_3fopts)
   local config = require("sm.config")
   local cmd = require("sm.cmd")
@@ -28,49 +24,24 @@ M["open-last"] = function()
   return memo["open-last"]()
 end
 M.list = function()
-  if has_telescope_3f() then
-    local telescope = require("sm.telescope")
-    return telescope["memo-picker"]()
-  else
-    return vim.notify("sm.nvim: Telescope not found. Use require('sm.api').get_memos() with your preferred picker.", vim.log.levels.WARN)
-  end
+  return vim.notify("sm.nvim: Use require('sm.api').get_memos() with your preferred picker.", vim.log.levels.WARN)
 end
 M.grep = function()
-  if has_telescope_3f() then
-    local telescope = require("sm.telescope")
-    return telescope["memo-grep"]()
-  else
-    local config = require("sm.config")
-    return vim.notify(("sm.nvim: Telescope not found. Use grep in: " .. config["get-memos-dir"]()), vim.log.levels.WARN)
-  end
+  local config = require("sm.config")
+  return vim.notify(("sm.nvim: Use grep in: " .. config["get-memos-dir"]()), vim.log.levels.WARN)
 end
 M.tags = function()
-  if has_telescope_3f() then
-    local telescope = require("sm.telescope")
-    return telescope["tag-picker"]()
-  else
-    return vim.notify("sm.nvim: Telescope not found. Use require('sm.api').get_tags() with your preferred picker.", vim.log.levels.WARN)
-  end
+  return vim.notify("sm.nvim: Use require('sm.api').get_tags() with your preferred picker.", vim.log.levels.WARN)
 end
 M["search-by-tag"] = function(tag)
-  if has_telescope_3f() then
-    local telescope = require("sm.telescope")
-    return telescope["memos-by-tag-picker"](tag)
-  else
-    return vim.notify("sm.nvim: Telescope not found. Use require('sm.api').get_memos_by_tag(tag) with your preferred picker.", vim.log.levels.WARN)
-  end
+  return vim.notify("sm.nvim: Use require('sm.api').get_memos_by_tag(tag) with your preferred picker.", vim.log.levels.WARN)
 end
 M["follow-link"] = function()
   local links = require("sm.links")
   return links["follow-link"]()
 end
 M["insert-link"] = function()
-  if has_telescope_3f() then
-    local links = require("sm.links")
-    return links["insert-link"]()
-  else
-    return vim.notify("sm.nvim: Telescope not found. Use require('sm.api').get_memos_for_link() with your preferred picker.", vim.log.levels.WARN)
-  end
+  return vim.notify("sm.nvim: Use require('sm.api').get_memos_for_link() with your preferred picker.", vim.log.levels.WARN)
 end
 M["list-all-tags"] = function()
   local tags = require("sm.tags")
@@ -82,7 +53,7 @@ M["add-tag"] = function(_3ftag)
   if _3ftag then
     return tags["add-tag-to-memo"](filepath, _3ftag)
   else
-    local function _7_(input)
+    local function _2_(input)
       if (input and (#input > 0)) then
         tags["add-tag-to-memo"](filepath, input)
         return vim.notify(("Added tag: " .. input), vim.log.levels.INFO)
@@ -90,7 +61,7 @@ M["add-tag"] = function(_3ftag)
         return nil
       end
     end
-    return vim.ui.input({prompt = "Tag to add: "}, _7_)
+    return vim.ui.input({prompt = "Tag to add: "}, _2_)
   end
 end
 return M
