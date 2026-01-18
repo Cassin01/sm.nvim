@@ -33,6 +33,49 @@ end
 M.get_filepath = function(filename)
   return (config.get_memos_dir() .. "/" .. filename)
 end
+local function create_centered_input(prompt, callback)
+  local width = 50
+  local height = 1
+  local row = math.max(0, math.floor(((vim.o.lines - height) / 2)))
+  local col = math.max(0, math.floor(((vim.o.columns - width) / 2)))
+  local buf = vim.api.nvim_create_buf(false, true)
+  local ok, win = pcall(vim.api.nvim_open_win, buf, true, {relative = "editor", width = width, height = height, row = row, col = col, style = "minimal", border = "rounded", title = (" " .. prompt .. " "), title_pos = "center"})
+  if not ok then
+    if vim.api.nvim_buf_is_valid(buf) then
+      vim.api.nvim_buf_delete(buf, {force = true})
+    else
+    end
+    return vim.notify(("Failed to create memo input window: " .. (win or "unknown error")), vim.log.levels.ERROR)
+  else
+    local function close_input()
+      if vim.api.nvim_win_is_valid(win) then
+        vim.api.nvim_win_close(win, true)
+      else
+      end
+      if vim.api.nvim_buf_is_valid(buf) then
+        return vim.api.nvim_buf_delete(buf, {force = true})
+      else
+        return nil
+      end
+    end
+    local function submit()
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, 1, false)
+      local text = (lines[1] or "")
+      close_input()
+      if (#text > 0) then
+        return callback(text)
+      else
+        return nil
+      end
+    end
+    vim.keymap.set("i", "<CR>", submit, {buffer = buf, noremap = true})
+    vim.keymap.set("n", "<CR>", submit, {buffer = buf, noremap = true})
+    vim.keymap.set("i", "<Esc>", close_input, {buffer = buf, noremap = true})
+    vim.keymap.set("n", "<Esc>", close_input, {buffer = buf, noremap = true})
+    vim.keymap.set("n", "q", close_input, {buffer = buf, noremap = true})
+    return vim.cmd("startinsert")
+  end
+end
 local function get_initial_tags()
   local cfg = config.get()
   local tags = {}
@@ -54,19 +97,19 @@ local function try_attach_copilot(attempts)
     if copilot_ok then
       local max_attempts = 3
       local delay = (attempts * 100)
-      local function _4_()
+      local function _9_()
         local ok, err
-        local function _5_()
+        local function _10_()
           return copilot.attach({force = true})
         end
-        ok, err = pcall(_5_)
+        ok, err = pcall(_10_)
         if (not ok and (attempts < max_attempts)) then
           return try_attach_copilot((attempts + 1))
         else
           return nil
         end
       end
-      return vim.defer_fn(_4_, delay)
+      return vim.defer_fn(_9_, delay)
     else
       return nil
     end
@@ -82,7 +125,7 @@ M.open_in_window = function(filepath, _3fopts)
   local buf = vim.fn.bufadd(filepath)
   vim.fn.bufload(buf)
   vim.bo[buf]["filetype"] = "markdown"
-  vim.api.nvim_open_win(buf, true, {relative = "editor", style = cfg.window.style, border = cfg.window.border, row = 3, col = (vim.o.columns - width - 2), height = height, width = width})
+  vim.api.nvim_open_win(buf, true, {relative = "editor", style = cfg.window.style, border = cfg.window.border, row = math.max(0, (vim.o.lines - height - 4)), col = 2, height = height, width = width})
   vim.wo["wrap"] = true
   try_attach_copilot(1)
   return buf
@@ -108,14 +151,7 @@ M.create = function(_3ftitle)
     state.add_recent(filename)
     return filepath
   else
-    local function _10_(input)
-      if (input and (#input > 0)) then
-        return M.create(input)
-      else
-        return nil
-      end
-    end
-    return vim.ui.input({prompt = "Memo title: "}, _10_)
+    return create_centered_input("Memo title:", M.create)
   end
 end
 M.open = function(filepath)
@@ -137,10 +173,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _14_(a, b)
+  local function _17_(a, b)
     return (a > b)
   end
-  table.sort(files, _14_)
+  table.sort(files, _17_)
   return files
 end
 M.delete = function(filepath)
