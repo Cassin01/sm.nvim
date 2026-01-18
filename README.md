@@ -39,7 +39,28 @@ Timestamped memos with wiki-style linking, right in your editor.
 ```lua
 {
   "Cassin01/sm.nvim",
-  config = true,
+  config = function()
+    require("sm").setup({
+      -- memos_dir = "~/.cache/nvim/sm/memos",
+      -- state_file = "~/.cache/nvim/sm/state.json",
+      -- date_format = "%Y%m%d_%H%M%S",
+      -- auto_tag_git_repo = false,
+      -- copilot_integration = false,
+      -- window = { width = 80, height = 30, border = "rounded", style = "minimal" },
+    })
+
+    -- Buffer-local keymaps for memo files
+    local group = vim.api.nvim_create_augroup("sm_user_keymaps", { clear = true })
+    vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+      group = group,
+      pattern = require("sm").autocmd_pattern(),
+      callback = function(args)
+        local buf = args.buf
+        vim.keymap.set("n", "<leader>mt", require("sm").buf_add_tag, { buffer = buf, desc = "Add tag" })
+        vim.keymap.set("n", "<leader>mf", require("sm").buf_follow_link, { buffer = buf, desc = "Follow link" })
+      end,
+    })
+  end,
   keys = {
     { "<Leader>mn", function() require("sm").create() end, desc = "New memo" },
     { "<Leader>mo", function() require("sm").open_last() end, desc = "Open last memo" },
@@ -64,26 +85,10 @@ That's it! Your memos are saved to `~/.cache/nvim/sm/memos/` by default.
 ## 📦 Installation
 
 <details>
-<summary><b>lazy.nvim</b> (recommended)</summary>
+<summary><b>lazy.nvim</b></summary>
 
 ```lua
 {
-  "Cassin01/sm.nvim",
-  config = function()
-    require("sm").setup({
-      -- your options here
-    })
-  end,
-}
-```
-
-</details>
-
-<details>
-<summary><b>packer.nvim</b></summary>
-
-```lua
-use {
   "Cassin01/sm.nvim",
   config = function()
     require("sm").setup({
@@ -161,34 +166,61 @@ sm.nvim provides a **picker-agnostic API** that works with any picker. See the A
 local api = require("sm.api")
 local fzf = require("fzf-lua")
 
--- List all memos
+local function create_memo_previewer(lookup)
+  local builtin = require("fzf-lua.previewer.builtin")
+  local MemoPreview = builtin.buffer_or_file:extend()
+
+  function MemoPreview:new(o, opts, fzf_win)
+    o = o or {}
+    o.render_markdown = false
+    MemoPreview.super.new(self, o, opts, fzf_win)
+    setmetatable(self, MemoPreview)
+    return self
+  end
+
+  function MemoPreview:parse_entry(entry_str)
+    local path = lookup[entry_str]
+    if not path then
+      return {}
+    end
+    return { path = path, line = 1, col = 1 }
+  end
+
+  return MemoPreview
+end
+
+-- List and open memos
 vim.keymap.set("n", "<Leader>ml", function()
   local entries = api.get_memos()
-  local items, lookup = {}, {}
+  local items = {}
+  local lookup = {}
   for _, entry in ipairs(entries) do
     table.insert(items, entry.text)
     lookup[entry.text] = entry.value
   end
   fzf.fzf_exec(items, {
     prompt = "Memos> ",
-    previewer = "builtin",
+    previewer = create_memo_previewer(lookup),
     actions = {
       ["default"] = function(selected)
-        if selected[1] then api.open_memo(lookup[selected[1]]) end
+        if selected[1] then
+          api.open_memo(lookup[selected[1]])
+        end
       end,
     },
   })
-end, { desc = "List memos" })
+end, { desc = "[sm] List memos" })
 
--- Grep memos
+-- Grep within memos directory
 vim.keymap.set("n", "<Leader>mg", function()
   fzf.live_grep({ cwd = api.get_memos_dir() })
 end, { desc = "Grep memos" })
 
--- Browse by tag
+-- Browse memos by tag
 vim.keymap.set("n", "<Leader>mt", function()
   local entries = api.get_tags()
-  local items, lookup = {}, {}
+  local items = {}
+  local lookup = {}
   for _, entry in ipairs(entries) do
     table.insert(items, entry.text)
     lookup[entry.text] = entry.value
@@ -200,17 +232,20 @@ vim.keymap.set("n", "<Leader>mt", function()
         if selected[1] then
           local tag = lookup[selected[1]]
           local memo_entries = api.get_memos_by_tag(tag)
-          local memo_items, memo_lookup = {}, {}
+          local memo_items = {}
+          local memo_lookup = {}
           for _, e in ipairs(memo_entries) do
             table.insert(memo_items, e.text)
             memo_lookup[e.text] = e.value
           end
           fzf.fzf_exec(memo_items, {
             prompt = "Memos [" .. tag .. "]> ",
-            previewer = "builtin",
+            previewer = create_memo_previewer(memo_lookup),
             actions = {
               ["default"] = function(sel)
-                if sel[1] then api.open_memo(memo_lookup[sel[1]]) end
+                if sel[1] then
+                  api.open_memo(memo_lookup[sel[1]])
+                end
               end,
             },
           })
@@ -218,12 +253,13 @@ vim.keymap.set("n", "<Leader>mt", function()
       end,
     },
   })
-end, { desc = "Browse tags" })
+end, { desc = "[sm] Browse tags" })
 
--- Insert link
+-- Insert wiki-style link
 vim.keymap.set("n", "<Leader>mi", function()
   local entries = api.get_memos_for_link()
-  local items, lookup = {}, {}
+  local items = {}
+  local lookup = {}
   for _, entry in ipairs(entries) do
     table.insert(items, entry.text)
     lookup[entry.text] = entry.value
@@ -232,11 +268,13 @@ vim.keymap.set("n", "<Leader>mi", function()
     prompt = "Insert Link> ",
     actions = {
       ["default"] = function(selected)
-        if selected[1] then api.insert_link(lookup[selected[1]]) end
+        if selected[1] then
+          api.insert_link(lookup[selected[1]])
+        end
       end,
     },
   })
-end, { desc = "Insert link" })
+end, { desc = "[sm] Insert link" })
 ```
 
 </details>
@@ -331,19 +369,8 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
   pattern = require("sm").autocmd_pattern(),
   callback = function(args)
     local buf = args.buf
-
-    -- Add tag
     vim.keymap.set("n", "<leader>mt", require("sm").buf_add_tag, { buffer = buf, desc = "Add tag" })
-
-    -- Follow link
     vim.keymap.set("n", "<leader>mf", require("sm").buf_follow_link, { buffer = buf, desc = "Follow link" })
-
-    -- Delete memo
-    vim.keymap.set("n", "<leader>md", function()
-      local filepath = vim.api.nvim_buf_get_name(buf)
-      require("sm.memo").delete(filepath)
-      vim.cmd("bdelete")
-    end, { buffer = buf, desc = "Delete memo" })
   end,
 })
 ```
