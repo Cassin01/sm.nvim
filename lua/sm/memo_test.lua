@@ -42,6 +42,13 @@ local function _9_()
   return {}
 end
 package.loaded["sm.state"] = {set_last_edited = _7_, add_recent = _8_, load = _9_}
+local function _10_()
+  return nil
+end
+local function _11_()
+  return false
+end
+package.loaded["sm.git"] = {get_repo_tag = _10_, is_git_repo = _11_}
 local M = require("sm.memo")
 assert((M._sanitize_title("Hello World!") == "hello-world"), "sanitize: spaces and punctuation")
 assert((M._sanitize_title("  Test  ") == "test"), "sanitize: trim whitespace")
@@ -62,5 +69,52 @@ do
   assert((info.filename == "20260117_143052_my-memo.md"), "info: filename")
   assert((info.date == "20260117_143052"), "info: date")
   assert((info.title == "my memo"), "info: title with spaces")
+end
+do
+  local content = M.generate_template("Test", {"tag1", "tag2"})
+  assert(content:match("tags: %[tag1, tag2%]"), "template: includes initial tags")
+end
+do
+  local content = M.generate_template("Test", {})
+  assert(content:match("tags: %[%]"), "template: empty tags when none provided")
+end
+do
+  local content = M.generate_template("Test")
+  assert(content:match("tags: %[%]"), "template: empty tags when nil provided")
+end
+do
+  package.loaded["sm.config"] = nil
+  package.loaded["sm.git"] = nil
+  package.loaded["sm.memo"] = nil
+  local function _12_()
+    return {auto_tag_git_repo = true, date_format = "%Y%m%d_%H%M%S", template = {"---", "tags: [%tags%]", "created: %date%", "---", "", "# %title%", ""}}
+  end
+  local function _13_()
+    return "/tmp/test-memos"
+  end
+  package.loaded["sm.config"] = {get = _12_, get_memos_dir = _13_}
+  local function _14_()
+    return "test-repo"
+  end
+  local function _15_()
+    return true
+  end
+  package.loaded["sm.git"] = {get_repo_tag = _14_, is_git_repo = _15_}
+  local function _16_()
+  end
+  local function _17_()
+  end
+  local function _18_()
+    return {}
+  end
+  package.loaded["sm.state"] = {set_last_edited = _16_, add_recent = _17_, load = _18_}
+  local M2 = require("sm.memo")
+  do
+    local tags = M2._get_initial_tags()
+    assert((#tags == 1), "auto_tag: returns one tag")
+    assert((tags[1] == "test-repo"), "auto_tag: returns correct repo name")
+  end
+  local content = M2.generate_template("Test", M2._get_initial_tags())
+  assert(content:match("tags: %[test%-repo%]"), "auto_tag: template includes repo tag")
 end
 return print("memo_test.lua: All tests passed")

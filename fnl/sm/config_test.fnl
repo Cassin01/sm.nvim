@@ -62,4 +62,16 @@
 (M.setup {:state_file "/custom/state.json"})
 (assert (= (M.get_state_file) "/custom/state.json") "get-state-file: respects custom path")
 
+;; Test auto_tag_git_repo default is false
+(M._reset)
+(M.setup {})
+(let [cfg (M.get)]
+  (assert (= cfg.auto_tag_git_repo false) "get: auto_tag_git_repo defaults to false"))
+
+;; Test auto_tag_git_repo can be enabled
+(M._reset)
+(M.setup {:auto_tag_git_repo true})
+(let [cfg (M.get)]
+  (assert (= cfg.auto_tag_git_repo true) "setup: auto_tag_git_repo can be enabled"))
+
 (print "config_test.lua: All tests passed")
