@@ -37,6 +37,7 @@ vim.keymap.set("n", "<Leader>ma", sm.add_tag, { desc = "[sm] Add tag to current 
 | `:SmOpen` | Open last edited memo |
 | `:SmAddTag [tag]` | Add tag to current memo |
 | `:SmFollowLink` | Follow wiki link under cursor |
+| `:SmMetaMemo` | Display self-aware memo statistics (joke) |
 
 ### Memo Format
 

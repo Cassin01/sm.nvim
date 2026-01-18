@@ -26,6 +26,12 @@
 
   (vim.api.nvim_create_user_command :SmFollowLink
     (fn [] ((. (require :sm) :follow_link)))
-    {:desc "Follow wiki link under cursor"}))
+    {:desc "Follow wiki link under cursor"})
+
+  (vim.api.nvim_create_user_command :SmMetaMemo
+    (fn []
+      (let [meta (require :sm.meta)]
+        (meta.show_in_float)))
+    {:desc "Show self-aware memo statistics (joke)"}))
 
 M
