@@ -22,14 +22,14 @@ M.setup = function()
     else
       tag = nil
     end
-    return require("sm").add_tag(tag)
+    return require("sm").buf_add_tag(tag)
   end
   local function _6_()
     return require("sm").list_all_tags()
   end
   vim.api.nvim_create_user_command("SmAddTag", _4_, {nargs = "?", complete = _6_, desc = "Add tag to current memo"})
   local function _7_()
-    return require("sm").follow_link()
+    return require("sm").buf_follow_link()
   end
   vim.api.nvim_create_user_command("SmFollowLink", _7_, {desc = "Follow wiki link under cursor"})
   local function _8_()
