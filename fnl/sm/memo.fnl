@@ -27,21 +27,39 @@
         safe_title (sanitize_title title)]
     (.. date "_" safe_title ".md")))
 
-(fn M.generate_template [title]
-  "Generate memo content from template"
+(fn M.generate_template [title ?initial-tags]
+  "Generate memo content from template.
+   ?initial-tags: optional list of tags to include
+   Supports %tags% placeholder (preferred) and legacy tags: [] format"
   (let [cfg (config.get)
         date_str (os.date "%Y-%m-%dT%H:%M:%S")
+        tags (or ?initial-tags [])
+        tags_str (table.concat tags ", ")
         lines []]
     (each [_ line (ipairs cfg.template)]
       (local processed (-> line
                           (: :gsub "%%date%%" date_str)
-                          (: :gsub "%%title%%" title)))
+                          (: :gsub "%%title%%" title)
+                          (: :gsub "%%tags%%" tags_str)
+                          ;; Backward compat: legacy "tags: []" templates (replace once)
+                          (: :gsub "tags: %[%]" (.. "tags: [" tags_str "]") 1)))
       (table.insert lines processed))
     (table.concat lines "\n")))
 
 (fn M.get_filepath [filename]
   "Get full path for a memo filename"
   (.. (config.get_memos_dir) "/" filename))
+
+(fn get_initial_tags []
+  "Build list of initial tags based on configuration"
+  (let [cfg (config.get)
+        tags []]
+    (when cfg.auto_tag_git_repo
+      (let [git (require :sm.git)
+            repo_tag (git.get_repo_tag)]
+        (when repo_tag
+          (table.insert tags repo_tag))))
+    tags))
 
 (fn try_attach_copilot [attempts]
   "Try to attach copilot if enabled and available (with exponential backoff)"
@@ -85,7 +103,8 @@
     (let [_ (ensure_memos_dir)
           filename (M.generate_filename ?title)
           filepath (M.get_filepath filename)
-          content (M.generate_template ?title)]
+          initial_tags (get_initial_tags)
+          content (M.generate_template ?title initial_tags)]
       (let [(file err) (io.open filepath :w)]
         (if file
           (do
@@ -145,5 +164,6 @@
 
 ;; Export for testing
 (tset M :_sanitize_title sanitize_title)
+(tset M :_get_initial_tags get_initial_tags)
 
 M
