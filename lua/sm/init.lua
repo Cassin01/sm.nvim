@@ -15,6 +15,10 @@ M.setup_autocmds = function()
   end
   return vim.api.nvim_create_autocmd({"BufEnter"}, {group = group, pattern = (config.get_memos_dir() .. "/*.md"), callback = _1_})
 end
+M.autocmd_pattern = function()
+  local config = require("sm.config")
+  return (config.get_memos_dir() .. "/*.md")
+end
 M.create = function(_3ftitle)
   local memo = require("sm.memo")
   return memo.create(_3ftitle)
@@ -23,7 +27,7 @@ M.open_last = function()
   local memo = require("sm.memo")
   return memo.open_last()
 end
-M.follow_link = function()
+M.buf_follow_link = function()
   local links = require("sm.links")
   return links.follow_link()
 end
@@ -31,7 +35,7 @@ M.list_all_tags = function()
   local tags = require("sm.tags")
   return tags.list_all_tags()
 end
-M.add_tag = function(_3ftag)
+M.buf_add_tag = function(_3ftag)
   local tags = require("sm.tags")
   local filepath = vim.api.nvim_buf_get_name(0)
   if _3ftag then

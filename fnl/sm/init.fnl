@@ -21,6 +21,14 @@
                    (let [links (require :sm.links)]
                      (links.setup_buffer_mappings)))})))
 
+;;; Public API - Configuration helpers
+
+(fn M.autocmd_pattern []
+  "Return autocommand pattern for memo files.
+   Use with BufNewFile/BufRead to set buffer-local keymaps."
+  (let [config (require :sm.config)]
+    (.. (config.get_memos_dir) "/*.md")))
+
 ;;; Public API - Memo operations
 
 (fn M.create [?title]
@@ -33,10 +41,10 @@
   (let [memo (require :sm.memo)]
     (memo.open_last)))
 
-;;; Public API - Link operations
+;;; Public API - Buffer operations
 
-(fn M.follow_link []
-  "Follow wiki link under cursor"
+(fn M.buf_follow_link []
+  "Follow wiki link under cursor in current buffer"
   (let [links (require :sm.links)]
     (links.follow_link)))
 
@@ -47,8 +55,8 @@
   (let [tags (require :sm.tags)]
     (tags.list_all_tags)))
 
-(fn M.add_tag [?tag]
-  "Add tag to current memo"
+(fn M.buf_add_tag [?tag]
+  "Add tag to current buffer's memo"
   (let [tags (require :sm.tags)
         filepath (vim.api.nvim_buf_get_name 0)]
     (if ?tag

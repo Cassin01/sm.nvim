@@ -19,13 +19,13 @@
   (vim.api.nvim_create_user_command :SmAddTag
     (fn [opts]
       (let [tag (when (and opts.args (> (length opts.args) 0)) opts.args)]
-        ((. (require :sm) :add_tag) tag)))
+        ((. (require :sm) :buf_add_tag) tag)))
     {:nargs "?"
      :complete (fn [] ((. (require :sm) :list_all_tags)))
      :desc "Add tag to current memo"})
 
   (vim.api.nvim_create_user_command :SmFollowLink
-    (fn [] ((. (require :sm) :follow_link)))
+    (fn [] ((. (require :sm) :buf_follow_link)))
     {:desc "Follow wiki link under cursor"})
 
   (vim.api.nvim_create_user_command :SmMetaMemo

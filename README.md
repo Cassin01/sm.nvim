@@ -292,11 +292,12 @@ end, { desc = "List memos" })
 ```lua
 local sm = require("sm")
 
-sm.create(title?)     -- Create new memo
-sm.open_last()        -- Open last edited memo
-sm.add_tag(tag?)      -- Add tag to current memo
-sm.follow_link()      -- Follow wiki link under cursor
-sm.list_all_tags()    -- Get all tags (for completion)
+sm.create(title?)      -- Create new memo
+sm.open_last()         -- Open last edited memo
+sm.buf_add_tag(tag?)   -- Add tag to current buffer's memo
+sm.buf_follow_link()   -- Follow wiki link under cursor
+sm.list_all_tags()     -- Get all tags (for completion)
+sm.autocmd_pattern()   -- Get pattern for autocommands (BufNewFile/BufRead)
 ```
 
 ### Picker API
@@ -317,6 +318,42 @@ api.insert_link(filename)  -- Insert [[filename]] at cursor
 -- Utility
 api.get_memos_dir()        -- Get memos directory path
 ```
+
+## 🎹 Buffer Keymaps
+
+Use `autocmd_pattern()` with native autocommands to set buffer-local keymaps for memo files:
+
+```lua
+local group = vim.api.nvim_create_augroup("sm_user_keymaps", { clear = true })
+
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+  group = group,
+  pattern = require("sm").autocmd_pattern(),
+  callback = function(args)
+    local buf = args.buf
+
+    -- Add tag
+    vim.keymap.set("n", "<leader>mt", require("sm").buf_add_tag, { buffer = buf, desc = "Add tag" })
+
+    -- Follow link
+    vim.keymap.set("n", "<leader>mf", require("sm").buf_follow_link, { buffer = buf, desc = "Follow link" })
+
+    -- Delete memo
+    vim.keymap.set("n", "<leader>md", function()
+      local filepath = vim.api.nvim_buf_get_name(buf)
+      require("sm.memo").delete(filepath)
+      vim.cmd("bdelete")
+    end, { buffer = buf, desc = "Delete memo" })
+  end,
+})
+```
+
+### Events
+
+| Event | Trigger |
+|-------|---------|
+| `BufNewFile` | New memo created via `create()` |
+| `BufRead` | Existing memo opened via `open()`, `open_last()` |
 
 ## 🤝 Contributing
 
