@@ -28,12 +28,19 @@
         dir (config.get_memos_dir)
         name_lower (name:lower)]
     (var result nil)
+    ;; First pass: try exact match
     (each [_ filepath (ipairs files) &until result]
       (let [filename (vim.fn.fnamemodify filepath ":t:r")
             filename_lower (filename:lower)]
-        (when (or (= filename_lower name_lower)
-                  (filename_lower:find name_lower 1 true))
+        (when (= filename_lower name_lower)
           (set result filepath))))
+    ;; Second pass: try partial match if no exact match found
+    (when (not result)
+      (each [_ filepath (ipairs files) &until result]
+        (let [filename (vim.fn.fnamemodify filepath ":t:r")
+              filename_lower (filename:lower)]
+          (when (filename_lower:find name_lower 1 true)
+            (set result filepath)))))
     result))
 
 (fn M.follow_link []

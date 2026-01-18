@@ -27,9 +27,20 @@ M.find_memo_by_partial = function(name)
     if result then break end
     local filename = vim.fn.fnamemodify(filepath, ":t:r")
     local filename_lower = filename:lower()
-    if ((filename_lower == name_lower) or filename_lower:find(name_lower, 1, true)) then
+    if (filename_lower == name_lower) then
       result = filepath
     else
+    end
+  end
+  if not result then
+    for _, filepath in ipairs(files) do
+      if result then break end
+      local filename = vim.fn.fnamemodify(filepath, ":t:r")
+      local filename_lower = filename:lower()
+      if filename_lower:find(name_lower, 1, true) then
+        result = filepath
+      else
+      end
     end
   end
   return result
