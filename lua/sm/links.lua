@@ -29,7 +29,6 @@ M.find_memo_by_partial = function(name)
     local filename_lower = filename:lower()
     if (filename_lower == name_lower) then
       result = filepath
-    else
     end
   end
   if not result then
@@ -39,7 +38,6 @@ M.find_memo_by_partial = function(name)
       local filename_lower = filename:lower()
       if filename_lower:find(name_lower, 1, true) then
         result = filepath
-      else
       end
     end
   end
