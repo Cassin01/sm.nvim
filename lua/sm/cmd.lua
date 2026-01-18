@@ -31,6 +31,11 @@ M.setup = function()
   local function _7_()
     return require("sm").follow_link()
   end
-  return vim.api.nvim_create_user_command("SmFollowLink", _7_, {desc = "Follow wiki link under cursor"})
+  vim.api.nvim_create_user_command("SmFollowLink", _7_, {desc = "Follow wiki link under cursor"})
+  local function _8_()
+    local meta = require("sm.meta")
+    return meta.show_in_float()
+  end
+  return vim.api.nvim_create_user_command("SmMetaMemo", _8_, {desc = "Show self-aware memo statistics (joke)"})
 end
 return M
