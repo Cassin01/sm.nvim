@@ -64,7 +64,7 @@
       (do
         (when (vim.api.nvim_buf_is_valid buf)
           (vim.api.nvim_buf_delete buf {:force true}))
-        (vim.notify "Failed to create memo input window" vim.log.levels.ERROR))
+        (vim.notify (.. "Failed to create memo input window: " (or win "unknown error")) vim.log.levels.ERROR))
       (do
         (fn close_input []
           (when (vim.api.nvim_win_is_valid win)

@@ -43,7 +43,7 @@ local function create_centered_input(prompt, callback)
       vim.api.nvim_buf_delete(buf, {force = true})
     else
     end
-    return vim.notify("Failed to create memo input window", vim.log.levels.ERROR)
+    return vim.notify(("Failed to create memo input window: " .. (win or "unknown error")), vim.log.levels.ERROR)
   else
     local function close_input()
       if vim.api.nvim_win_is_valid(win) then
