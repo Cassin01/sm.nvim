@@ -115,11 +115,13 @@ require("sm").setup({
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `memos_dir` | `~/.cache/nvim/sm/memos` | Directory for memo storage |
-| `auto_tag_git_repo` | `false` | Auto-tag memos with git repository name |
-| `window.width` | `80` | Floating window width |
-| `window.height` | `30` | Floating window height |
-| `window.border` | `"rounded"` | Window border style |
+| `memos_dir` | `~/.cache/nvim/sm/memos` | Directory where memos are stored |
+| `state_file` | `~/.cache/nvim/sm/state.json` | JSON file for persistent state (last edited, recent memos) |
+| `date_format` | `"%Y%m%d_%H%M%S"` | Format string for timestamp in filenames (see `os.date()`) |
+| `auto_tag_git_repo` | `false` | Auto-tag new memos with git repo name (sanitized: "sm.nvim" → "sm-nvim") |
+| `copilot_integration` | `false` | Attach Copilot to memo buffers (requires copilot.vim) |
+| `template` | See below | Template for new memo content (supports `%date%`, `%title%`, `%tags%` placeholders) |
+| `window` | `{width=80, height=30, border="rounded", style="minimal"}` | Floating window configuration |
 
 ## 📋 Commands
 
@@ -129,6 +131,7 @@ require("sm").setup({
 | `:SmOpen` | Open last edited memo |
 | `:SmAddTag [tag]` | Add tag to current memo |
 | `:SmFollowLink` | Follow wiki link under cursor |
+| `:SmMetaMemo` | Display self-aware memo statistics (easter egg) |
 
 ## 🗒️ Memo Format
 

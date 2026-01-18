@@ -195,6 +195,12 @@ Options:
 		lowercase with hyphens (e.g., "sm.nvim" becomes "sm-nvim").
 		Default: false
 
+	copilot_integration ~
+		When true, attaches Copilot to memo buffers opened in
+		floating windows. Uses exponential backoff for reliable
+		attachment. Requires copilot.vim plugin.
+		Default: false
+
 	template ~
 		List of lines for new memo template. Supports variables:
 		- `%date%` - ISO 8601 timestamp (e.g., `2026-01-17T14:30:52`)
