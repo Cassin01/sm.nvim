@@ -79,8 +79,12 @@ sm.setup({
 | Option | Default | Description |
 |--------|---------|-------------|
 | `memos_dir` | `~/.cache/nvim/sm/memos` | Directory where memos are stored |
-| `auto_tag_git_repo` | `false` | When `true`, new memos are auto-tagged with the git repository name (sanitized to lowercase with hyphens, e.g., "sm.nvim" → "sm-nvim") |
-| `window` | `{width=80, height=30, border="rounded"}` | Floating window configuration |
+| `state_file` | `~/.cache/nvim/sm/state.json` | JSON file for persistent state (last edited, recent memos) |
+| `date_format` | `"%Y%m%d_%H%M%S"` | Format string for timestamp in filenames (see `os.date()`) |
+| `auto_tag_git_repo` | `false` | Auto-tag new memos with git repo name (sanitized: "sm.nvim" → "sm-nvim") |
+| `copilot_integration` | `false` | Attach Copilot to memo buffers (requires copilot.vim) |
+| `template` | See below | Template for new memo content (supports `%date%`, `%title%`, `%tags%` placeholders) |
+| `window` | `{width=80, height=30, border="rounded", style="minimal"}` | Floating window configuration |
 
 ## Picker Integration
 
