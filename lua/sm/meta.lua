@@ -105,9 +105,9 @@ M.show_in_float = function()
   local row = math.floor(((vim.o.lines - height) / 2))
   local col = math.floor(((vim.o.columns - width) / 2))
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-  vim.api.nvim_buf_set_option(buf, "modifiable", false)
-  vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
-  vim.api.nvim_buf_set_option(buf, "filetype", "markdown")
+  vim.bo[buf]["modifiable"] = false
+  vim.bo[buf]["bufhidden"] = "wipe"
+  vim.bo[buf]["filetype"] = "markdown"
   local win = vim.api.nvim_open_win(buf, true, {relative = "editor", style = (cfg.window.style or "minimal"), border = (cfg.window.border or "rounded"), row = row, col = col, width = width, height = height, title = " The Memo Knows ", title_pos = "center"})
   local function _8_()
     return vim.api.nvim_win_close(win, true)

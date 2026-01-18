@@ -134,9 +134,9 @@
     (vim.api.nvim_buf_set_lines buf 0 -1 false lines)
 
     ;; Buffer options
-    (vim.api.nvim_buf_set_option buf :modifiable false)
-    (vim.api.nvim_buf_set_option buf :bufhidden :wipe)
-    (vim.api.nvim_buf_set_option buf :filetype :markdown)
+    (tset vim.bo buf :modifiable false)
+    (tset vim.bo buf :bufhidden :wipe)
+    (tset vim.bo buf :filetype :markdown)
 
     ;; Open floating window
     (let [win (vim.api.nvim_open_win buf true
