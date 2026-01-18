@@ -11,7 +11,7 @@
 
 (fn M.is_git_repo []
   "Check if current working directory is inside a git repository.
-   Uses get_repo_name to avoid duplicate finddir calls.
+   Convenience wrapper around get_repo_name.
    Returns: boolean"
   (not= (M.get_repo_name) nil))
 
