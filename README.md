@@ -380,7 +380,7 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
 | Event | Trigger |
 |-------|---------|
 | `BufNewFile` | New memo created via `create()` |
-| `BufRead` | Existing memo opened via `open()`, `open_last()` |
+| `BufRead` | Existing memo opened via `api.open_memo()`, `open_last()` |
 
 ## 🤝 Contributing
 
