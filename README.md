@@ -11,9 +11,7 @@
 
 Timestamped memos with wiki-style linking, right in your editor.
 
-<!-- TODO: Add GIF demo here
 ![demo](assets/demo.gif)
--->
 
 [Features](#-features) •
 [Quick Start](#-quick-start) •
