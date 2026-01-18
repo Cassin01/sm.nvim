@@ -328,4 +328,4 @@ This plugin is written in [Fennel](https://fennel-lang.org/), a Lisp that compil
 
 ## 📄 License
 
-[MIT](LICENSE) © Cassin01
+[Apache-2.0](LICENSE) © Cassin01
