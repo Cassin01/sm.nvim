@@ -1,71 +1,108 @@
-# sm.nvim - Simple Memo
+<div align="center">
 
-A memo management module for Neovim with tagging, wiki-style linking, and picker integration.
+# sm.nvim
 
-## Features
+[![Neovim](https://img.shields.io/badge/Neovim-0.9+-57A143?logo=neovim&logoColor=white)](https://neovim.io/)
+[![Fennel](https://img.shields.io/badge/Made_with-Fennel-yellow)](https://fennel-lang.org/)
+[![CI](https://github.com/Cassin01/sm.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/Cassin01/sm.nvim/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/Cassin01/sm.nvim)](LICENSE)
 
-- Create timestamped memos (`YYYYMMDD_HHMMSS_{title}.md`)
-- YAML frontmatter with tags
-- Wiki-style `[[links]]` between memos
-- Floating window UI with Copilot support
-- **Picker-agnostic API** - works with any picker (fzf-lua, snacks.nvim, mini.pick, wf.nvim, etc.)
+**Simple Memo for Neovim**
 
-## Storage
+Timestamped memos with wiki-style linking, right in your editor.
 
-Memos are stored in `~/.cache/nvim/sm/memos/` (default, configurable via `memos_dir`)
+<!-- TODO: Add GIF demo here
+![demo](assets/demo.gif)
+-->
 
-## Usage
+[Features](#-features) •
+[Quick Start](#-quick-start) •
+[Configuration](#%EF%B8%8F-configuration) •
+[Picker Integration](#-picker-integration) •
+[API](#-api)
 
-### Keymaps (Example)
+</div>
 
-This plugin does not set any keymaps by default. Here's an example configuration in Lua:
-
-```lua
-local sm = require("sm")
-
-vim.keymap.set("n", "<Leader>mn", sm.create, { desc = "[sm] New memo with timestamp" })
-vim.keymap.set("n", "<Leader>mo", sm.open_last, { desc = "[sm] Open last edited" })
-vim.keymap.set("n", "<Leader>mf", sm.follow_link, { desc = "[sm] Follow wiki link under cursor" })
-vim.keymap.set("n", "<Leader>ma", sm.add_tag, { desc = "[sm] Add tag to current memo" })
-```
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `:SmNew [title]` | Create new memo (prompts if no title) |
-| `:SmOpen` | Open last edited memo |
-| `:SmAddTag [tag]` | Add tag to current memo |
-| `:SmFollowLink` | Follow wiki link under cursor |
-| `:SmMetaMemo` | Display self-aware memo statistics (joke) |
-
-### Memo Format
-
-```markdown
----
-tags: [work, ideas]
-created: 2026-01-17T14:30:52
 ---
 
-# Meeting Notes
+## ✨ Features
 
-Link to another memo: [[20260115_project-ideas]]
+- **Timestamped memos** — Files named `YYYYMMDD_HHMMSS_{title}.md`
+- **YAML frontmatter** — Tags, creation date, and metadata
+- **Wiki-style linking** — Connect memos with `[[links]]`
+- **Floating window UI** — Distraction-free editing
+- **Git auto-tagging** — Automatically tag memos with repository name
+- **Picker-agnostic** — Works with fzf-lua, snacks.nvim, mini.pick, or any picker
 
-Content here...
-```
+## 🚀 Quick Start
 
-### Wiki Links
-
-In memo buffers, press `gf` on `[[memo-name]]` to follow the link.
-Links match by partial filename (case-insensitive).
-
-## Configuration
+### 1. Install with lazy.nvim
 
 ```lua
-local sm = require("sm")
-sm.setup({
-  memos_dir = "~/.cache/nvim/sm/memos",
-  auto_tag_git_repo = true,  -- Auto-tag memos with git repo name
+{
+  "Cassin01/sm.nvim",
+  config = true,
+  keys = {
+    { "<Leader>mn", function() require("sm").create() end, desc = "New memo" },
+    { "<Leader>mo", function() require("sm").open_last() end, desc = "Open last memo" },
+  },
+}
+```
+
+### 2. Create your first memo
+
+```
+:SmNew meeting notes
+```
+
+### 3. Browse your memos
+
+```
+:SmOpen
+```
+
+That's it! Your memos are saved to `~/.cache/nvim/sm/memos/` by default.
+
+## 📦 Installation
+
+<details>
+<summary><b>lazy.nvim</b> (recommended)</summary>
+
+```lua
+{
+  "Cassin01/sm.nvim",
+  config = function()
+    require("sm").setup({
+      -- your options here
+    })
+  end,
+}
+```
+
+</details>
+
+<details>
+<summary><b>packer.nvim</b></summary>
+
+```lua
+use {
+  "Cassin01/sm.nvim",
+  config = function()
+    require("sm").setup({
+      -- your options here
+    })
+  end,
+}
+```
+
+</details>
+
+## ⚙️ Configuration
+
+```lua
+require("sm").setup({
+  memos_dir = "~/.cache/nvim/sm/memos",  -- Where memos are stored
+  auto_tag_git_repo = true,              -- Auto-tag with git repo name
   window = {
     width = 80,
     height = 30,
@@ -86,42 +123,50 @@ sm.setup({
 | `template` | See below | Template for new memo content (supports `%date%`, `%title%`, `%tags%` placeholders) |
 | `window` | `{width=80, height=30, border="rounded", style="minimal"}` | Floating window configuration |
 
-## Picker Integration
+## 📋 Commands
 
-sm.nvim provides a public API (`require("sm.api")`) that works with any picker.
+| Command | Description |
+|---------|-------------|
+| `:SmNew [title]` | Create new memo (prompts if no title) |
+| `:SmOpen` | Open last edited memo |
+| `:SmAddTag [tag]` | Add tag to current memo |
+| `:SmFollowLink` | Follow wiki link under cursor |
+| `:SmMetaMemo` | Display self-aware memo statistics (easter egg) |
 
-### API Reference
+## 🗒️ Memo Format
 
-```lua
-local api = require("sm.api")
+```markdown
+---
+tags: [work, ideas]
+created: 2026-01-17T14:30:52
+---
 
--- Data functions (return picker-ready entries)
-api.get_memos()           -- All memos: {value=filepath, text=display, ordinal, info, tags}
-api.get_tags()            -- All tags:  {value=tag, text=display, ordinal, count}
-api.get_memos_by_tag(tag) -- Filtered:  {value=filepath, text=display, ordinal, info}
-api.get_memos_for_link()  -- For links: {value=filename, text=display, ordinal, filepath}
+# Meeting Notes
 
--- Action functions (use as selection callbacks)
-api.open_memo(filepath)   -- Open memo in floating window
-api.insert_link(filename) -- Insert [[filename]] at cursor
+Link to another memo: [[20260115_project-ideas]]
 
--- Utility
-api.get_memos_dir()       -- Get memos directory path (for grep)
+Your content here...
 ```
 
-### Picker Examples
+### Wiki Links
+
+In memo buffers, place your cursor on `[[memo-name]]` and press `gf` (or `:SmFollowLink`) to follow the link. Links match by partial filename (case-insensitive).
+
+## 🔌 Picker Integration
+
+sm.nvim provides a **picker-agnostic API** that works with any picker. See the API reference below.
 
 <details>
-<summary><b>fzf-lua</b></summary>
+<summary><b>fzf-lua example</b></summary>
 
 ```lua
 local api = require("sm.api")
 local fzf = require("fzf-lua")
 
+-- List all memos
 vim.keymap.set("n", "<Leader>ml", function()
   local entries = api.get_memos()
-  local items = {}
-  local lookup = {}
+  local items, lookup = {}, {}
   for _, entry in ipairs(entries) do
     table.insert(items, entry.text)
     lookup[entry.text] = entry.value
@@ -131,22 +176,21 @@ vim.keymap.set("n", "<Leader>ml", function()
     previewer = "builtin",
     actions = {
       ["default"] = function(selected)
-        if selected[1] then
-          api.open_memo(lookup[selected[1]])
-        end
+        if selected[1] then api.open_memo(lookup[selected[1]]) end
       end,
     },
   })
 end, { desc = "List memos" })
 
+-- Grep memos
 vim.keymap.set("n", "<Leader>mg", function()
   fzf.live_grep({ cwd = api.get_memos_dir() })
 end, { desc = "Grep memos" })
 
+-- Browse by tag
 vim.keymap.set("n", "<Leader>mt", function()
   local entries = api.get_tags()
-  local items = {}
-  local lookup = {}
+  local items, lookup = {}, {}
   for _, entry in ipairs(entries) do
     table.insert(items, entry.text)
     lookup[entry.text] = entry.value
@@ -158,8 +202,7 @@ vim.keymap.set("n", "<Leader>mt", function()
         if selected[1] then
           local tag = lookup[selected[1]]
           local memo_entries = api.get_memos_by_tag(tag)
-          local memo_items = {}
-          local memo_lookup = {}
+          local memo_items, memo_lookup = {}, {}
           for _, e in ipairs(memo_entries) do
             table.insert(memo_items, e.text)
             memo_lookup[e.text] = e.value
@@ -169,9 +212,7 @@ vim.keymap.set("n", "<Leader>mt", function()
             previewer = "builtin",
             actions = {
               ["default"] = function(sel)
-                if sel[1] then
-                  api.open_memo(memo_lookup[sel[1]])
-                end
+                if sel[1] then api.open_memo(memo_lookup[sel[1]]) end
               end,
             },
           })
@@ -181,10 +222,10 @@ vim.keymap.set("n", "<Leader>mt", function()
   })
 end, { desc = "Browse tags" })
 
+-- Insert link
 vim.keymap.set("n", "<Leader>mi", function()
   local entries = api.get_memos_for_link()
-  local items = {}
-  local lookup = {}
+  local items, lookup = {}, {}
   for _, entry in ipairs(entries) do
     table.insert(items, entry.text)
     lookup[entry.text] = entry.value
@@ -193,9 +234,7 @@ vim.keymap.set("n", "<Leader>mi", function()
     prompt = "Insert Link> ",
     actions = {
       ["default"] = function(selected)
-        if selected[1] then
-          api.insert_link(lookup[selected[1]])
-        end
+        if selected[1] then api.insert_link(lookup[selected[1]]) end
       end,
     },
   })
@@ -204,24 +243,89 @@ end, { desc = "Insert link" })
 
 </details>
 
-## API
+<details>
+<summary><b>snacks.nvim example</b></summary>
 
-### Memo Operations
+```lua
+local api = require("sm.api")
+local Snacks = require("snacks")
 
-| Function | Description |
-|----------|-------------|
-| `sm.create(?title)` | Create new memo |
-| `sm.open_last()` | Open last edited memo |
+vim.keymap.set("n", "<Leader>ml", function()
+  Snacks.picker.pick({
+    title = "Memos",
+    items = api.get_memos(),
+    format = function(item) return item.text end,
+    on_select = function(item) api.open_memo(item.value) end,
+  })
+end, { desc = "List memos" })
+```
 
-### Tag Operations
+</details>
 
-| Function | Description |
-|----------|-------------|
-| `sm.list_all_tags()` | Get all tags (for completion) |
-| `sm.add_tag(?tag)` | Add tag to current memo |
+<details>
+<summary><b>mini.pick example</b></summary>
 
-### Link Operations
+```lua
+local api = require("sm.api")
+local MiniPick = require("mini.pick")
 
-| Function | Description |
-|----------|-------------|
-| `sm.follow_link()` | Follow wiki link under cursor |
+vim.keymap.set("n", "<Leader>ml", function()
+  local entries = api.get_memos()
+  MiniPick.start({
+    source = {
+      items = entries,
+      name = "Memos",
+      show = function(buf_id, items, query)
+        local lines = vim.tbl_map(function(item) return item.text end, items)
+        vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, lines)
+      end,
+      choose = function(item) api.open_memo(item.value) end,
+    },
+  })
+end, { desc = "List memos" })
+```
+
+</details>
+
+## 📖 API
+
+### Core Functions
+
+```lua
+local sm = require("sm")
+
+sm.create(title?)     -- Create new memo
+sm.open_last()        -- Open last edited memo
+sm.add_tag(tag?)      -- Add tag to current memo
+sm.follow_link()      -- Follow wiki link under cursor
+sm.list_all_tags()    -- Get all tags (for completion)
+```
+
+### Picker API
+
+```lua
+local api = require("sm.api")
+
+-- Data functions (return picker-ready entries)
+api.get_memos()            -- All memos: {value, text, ordinal, info, tags}
+api.get_tags()             -- All tags: {value, text, ordinal, count}
+api.get_memos_by_tag(tag)  -- Filtered memos: {value, text, ordinal, info}
+api.get_memos_for_link()   -- For links: {value, text, ordinal, filepath}
+
+-- Action functions
+api.open_memo(filepath)    -- Open memo in floating window
+api.insert_link(filename)  -- Insert [[filename]] at cursor
+
+-- Utility
+api.get_memos_dir()        -- Get memos directory path
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+This plugin is written in [Fennel](https://fennel-lang.org/), a Lisp that compiles to Lua.
+
+## 📄 License
+
+[MIT](LICENSE) © Cassin01
