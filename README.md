@@ -146,14 +146,14 @@ created: 2026-01-17T14:30:52
 
 # Meeting Notes
 
-Link to another memo: [[20260115_project-ideas]]
+Link to another memo: [[20260115_143052_project-ideas]]
 
 Your content here...
 ```
 
 ### Wiki Links
 
-In memo buffers, place your cursor on `[[memo-name]]` and press `gf` (or `:SmFollowLink`) to follow the link. Links match by partial filename (case-insensitive).
+In memo buffers, place your cursor on `[[memo-name]]` and press `gf` (or `:SmFollowLink`) to follow the link. Links use the full filename with timestamp (e.g., `[[20260117_120000_meeting-notes]]`) to ensure uniqueness. Link matching is case-insensitive and prefers exact matches, but also supports partial matching for convenience.
 
 ## 🔌 Picker Integration
 
@@ -347,11 +347,11 @@ local api = require("sm.api")
 api.get_memos()            -- All memos: {value, text, ordinal, info, tags}
 api.get_tags()             -- All tags: {value, text, ordinal, count}
 api.get_memos_by_tag(tag)  -- Filtered memos: {value, text, ordinal, info}
-api.get_memos_for_link()   -- For links: {value, text, ordinal, filepath}
+api.get_memos_for_link()   -- For links: {value=filename_with_timestamp, text, ordinal, filepath}
 
 -- Action functions
 api.open_memo(filepath)    -- Open memo in floating window
-api.insert_link(filename)  -- Insert [[filename]] at cursor
+api.insert_link(filename)  -- Insert [[filename]] at cursor (use full filename with timestamp)
 
 -- Utility
 api.get_memos_dir()        -- Get memos directory path
