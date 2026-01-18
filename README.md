@@ -65,6 +65,7 @@ Links match by partial filename (case-insensitive).
 local sm = require("sm")
 sm.setup({
   memos_dir = "~/.cache/nvim/sm/memos",
+  auto_tag_git_repo = true,  -- Auto-tag memos with git repo name
   window = {
     width = 80,
     height = 30,
@@ -72,6 +73,14 @@ sm.setup({
   },
 })
 ```
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `memos_dir` | `~/.cache/nvim/sm/memos` | Directory where memos are stored |
+| `auto_tag_git_repo` | `false` | When `true`, new memos are auto-tagged with the git repository name (sanitized to lowercase with hyphens, e.g., "sm.nvim" → "sm-nvim") |
+| `window` | `{width=80, height=30, border="rounded"}` | Floating window configuration |
 
 ## Picker Integration
 
