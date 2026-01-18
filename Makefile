@@ -1,10 +1,9 @@
-LUA_FILES := lua/sm/api.lua lua/sm/cmd.lua lua/sm/config.lua lua/sm/git.lua \
-             lua/sm/init.lua lua/sm/links.lua lua/sm/memo.lua lua/sm/state.lua \
-             lua/sm/tags.lua
+FNL_FILES := $(wildcard fnl/sm/*.fnl)
+FNL_TEST_FILES := $(wildcard fnl/sm/*_test.fnl)
+FNL_SRC_FILES := $(filter-out $(FNL_TEST_FILES),$(FNL_FILES))
 
-TEST_FILES := lua/sm/api_test.lua lua/sm/config_test.lua lua/sm/git_test.lua \
-              lua/sm/links_test.lua lua/sm/memo_test.lua lua/sm/state_test.lua \
-              lua/sm/tags_test.lua
+LUA_FILES := $(patsubst fnl/sm/%.fnl,lua/sm/%.lua,$(FNL_SRC_FILES))
+TEST_FILES := $(patsubst fnl/sm/%.fnl,lua/sm/%.lua,$(FNL_TEST_FILES))
 
 all: $(LUA_FILES) $(TEST_FILES)
 
