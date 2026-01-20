@@ -10,7 +10,7 @@ local function ensure_memos_dir()
   return dir
 end
 local function sanitize_title(title)
-  return title:lower():gsub("[^%w%-%_]+", "-"):gsub("^%-+", ""):gsub("%-+$", ""):gsub("%-%-+", "-")
+  return title:lower():gsub("[%s%c!\"#$%%&'()*+,./:;<=>?@%[\\%]^`{|}~]+", "-"):gsub("^%-+", ""):gsub("%-+$", ""):gsub("%-%-+", "-")
 end
 M.generate_filename = function(title)
   local cfg = config.get()

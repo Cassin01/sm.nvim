@@ -15,7 +15,7 @@
   "Convert title to safe filename component"
   (-> title
       (: :lower)
-      (: :gsub "[^%w%-%_]+" "-")
+      (: :gsub "[%s%c!\"#$%%&'()*+,./:;<=>?@%[\\%]^`{|}~]+" "-")
       (: :gsub "^%-+" "")
       (: :gsub "%-+$" "")
       (: :gsub "%-%-+" "-")))
