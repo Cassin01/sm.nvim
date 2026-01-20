@@ -117,8 +117,24 @@
                     (try_attach_copilot (+ attempts 1)))))
               delay)))))))
 
+(fn goto_last_line []
+  "Move cursor to the last line of current buffer"
+  (let [last_line (vim.api.nvim_buf_line_count 0)]
+    (vim.api.nvim_win_set_cursor 0 [last_line 0])))
+
+(fn M.open_in_split [filepath]
+  "Open file in horizontal split at bottom"
+  (let [buf (vim.fn.bufadd filepath)]
+    (vim.fn.bufload buf)
+    (tset vim.bo buf :filetype :markdown)
+    (vim.cmd "botright split")
+    (vim.api.nvim_win_set_buf 0 buf)
+    (tset vim.wo :wrap true)
+    (try_attach_copilot 1)
+    buf))
+
 (fn M.open_in_window [filepath ?opts]
-  "Open file in floating window"
+  "Open file in floating window (currently unused)"
   (let [cfg (config.get)
         opts (or ?opts {})
         width (or opts.width cfg.window.width)
@@ -152,7 +168,8 @@
             (file:write content)
             (file:close))
           (vim.notify (.. "Failed to create memo: " (or err "unknown error")) vim.log.levels.ERROR)))
-      (M.open_in_window filepath)
+      (M.open_in_split filepath)
+      (goto_last_line)
       (state.set_last_edited filename)
       (state.add_recent filename)
       filepath)
@@ -161,7 +178,7 @@
 (fn M.open [filepath]
   "Open specific memo"
   (let [filename (vim.fn.fnamemodify filepath ":t")]
-    (M.open_in_window filepath)
+    (M.open_in_split filepath)
     (state.set_last_edited filename)
     (state.add_recent filename)))
 
