@@ -54,6 +54,9 @@ assert((M._sanitize_title("Hello World!") == "hello-world"), "sanitize: spaces a
 assert((M._sanitize_title("  Test  ") == "test"), "sanitize: trim whitespace")
 assert((M._sanitize_title("My--Title") == "my-title"), "sanitize: collapse dashes")
 assert((M._sanitize_title("CamelCase") == "camelcase"), "sanitize: lowercase")
+assert((M._sanitize_title("\230\151\165\230\156\172\232\170\158") == "\230\151\165\230\156\172\232\170\158"), "sanitize: preserve Japanese")
+assert((M._sanitize_title("\230\151\165\230\156\172\232\170\158 Test") == "\230\151\165\230\156\172\232\170\158-test"), "sanitize: Japanese with ASCII")
+assert((M._sanitize_title("\232\168\152\229\143\183\239\188\129\227\131\134\227\130\185\227\131\136") == "\232\168\152\229\143\183\239\188\129\227\131\134\227\130\185\227\131\136"), "sanitize: preserve full-width punctuation")
 do
   local filename = M.generate_filename("test")
   assert(filename:match("^%d+_%d+_test%.md$"), "filename: format YYYYMMDD_HHMMSS_title.md")

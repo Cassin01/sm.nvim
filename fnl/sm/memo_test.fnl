@@ -40,6 +40,9 @@
 (assert (= (M._sanitize_title "  Test  ") "test") "sanitize: trim whitespace")
 (assert (= (M._sanitize_title "My--Title") "my-title") "sanitize: collapse dashes")
 (assert (= (M._sanitize_title "CamelCase") "camelcase") "sanitize: lowercase")
+(assert (= (M._sanitize_title "日本語") "日本語") "sanitize: preserve Japanese")
+(assert (= (M._sanitize_title "日本語 Test") "日本語-test") "sanitize: Japanese with ASCII")
+(assert (= (M._sanitize_title "記号！テスト") "記号！テスト") "sanitize: preserve full-width punctuation")
 
 ;; Test generate_filename format
 (let [filename (M.generate_filename "test")]
