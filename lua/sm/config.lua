@@ -1,5 +1,5 @@
 local M = {}
-local defaults = {memos_dir = nil, state_file = nil, date_format = "%Y%m%d_%H%M%S", template = {"---", "tags: [%tags%]", "created: %date%", "---", "", "# %title%", ""}, window = {width = 80, height = 30, border = "rounded", style = "minimal"}, auto_tag_git_repo = false, copilot_integration = false}
+local defaults = {memos_dir = nil, state_file = nil, date_format = "%Y%m%d_%H%M%S", split_height = 15, template = {"---", "tags: [%tags%]", "created: %date%", "---", "", "# %title%", ""}, window = {width = 80, height = 30, border = "rounded", style = "minimal"}, auto_tag_git_repo = false, copilot_integration = false}
 local config = nil
 local setup_called = false
 M.get_base_dir = function()

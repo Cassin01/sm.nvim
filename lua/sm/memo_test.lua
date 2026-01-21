@@ -120,4 +120,68 @@ do
   local content = M2.generate_template("Test", M2._get_initial_tags())
   assert(content:match("tags: %[test%-repo%]"), "auto_tag: template includes repo tag")
 end
+do
+  package.loaded["sm.config"] = nil
+  package.loaded["sm.git"] = nil
+  package.loaded["sm.memo"] = nil
+  local set_height_calls = {}
+  if not _G.vim.api then
+    _G.vim.api = {}
+  else
+  end
+  local function _20_(win, height)
+    return table.insert(set_height_calls, {win = win, height = height})
+  end
+  _G.vim.api["nvim_win_set_height"] = _20_
+  local function _21_()
+    return {split_height = 15, date_format = "%Y%m%d_%H%M%S", template = {"---", "# %title%", ""}, copilot_integration = false}
+  end
+  local function _22_()
+    return "/tmp/test-memos"
+  end
+  package.loaded["sm.config"] = {get = _21_, get_memos_dir = _22_}
+  local function _23_()
+    return nil
+  end
+  local function _24_()
+    return false
+  end
+  package.loaded["sm.git"] = {get_repo_tag = _23_, is_git_repo = _24_}
+  local function _25_()
+  end
+  local function _26_()
+  end
+  local function _27_()
+    return {}
+  end
+  package.loaded["sm.state"] = {set_last_edited = _25_, add_recent = _26_, load = _27_}
+  local function _28_(filepath)
+    return 1
+  end
+  _G.vim.fn["bufadd"] = _28_
+  local function _29_(buf)
+    return nil
+  end
+  _G.vim.fn["bufload"] = _29_
+  local function _30_()
+    return {}
+  end
+  _G.vim.bo = setmetatable({}, {__index = _30_})
+  local function _31_()
+    return {}
+  end
+  _G.vim.wo = setmetatable({}, {__index = _31_})
+  local function _32_(cmd)
+    return nil
+  end
+  _G.vim["cmd"] = _32_
+  local function _33_(win, buf)
+    return nil
+  end
+  _G.vim.api["nvim_win_set_buf"] = _33_
+  local M3 = require("sm.memo")
+  M3.open_in_split("/tmp/test-memos/test.md")
+  assert((#set_height_calls == 1), "split_height: nvim_win_set_height called once")
+  assert((set_height_calls[1].height == 15), "split_height: height set to config value")
+end
 return print("memo_test.lua: All tests passed")

@@ -123,10 +123,15 @@ local function goto_last_line()
 end
 M.open_in_split = function(filepath)
   local buf = vim.fn.bufadd(filepath)
+  local cfg = config.get()
   vim.fn.bufload(buf)
   vim.bo[buf]["filetype"] = "markdown"
   vim.cmd("botright split")
   vim.api.nvim_win_set_buf(0, buf)
+  if cfg.split_height then
+    vim.api.nvim_win_set_height(0, cfg.split_height)
+  else
+  end
   vim.wo["wrap"] = true
   try_attach_copilot(1)
   return buf
@@ -188,10 +193,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _17_(a, b)
+  local function _18_(a, b)
     return (a > b)
   end
-  table.sort(files, _17_)
+  table.sort(files, _18_)
   return files
 end
 M.delete = function(filepath)
