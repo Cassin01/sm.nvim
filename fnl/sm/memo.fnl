@@ -124,11 +124,14 @@
 
 (fn M.open_in_split [filepath]
   "Open file in horizontal split at bottom"
-  (let [buf (vim.fn.bufadd filepath)]
+  (let [buf (vim.fn.bufadd filepath)
+        cfg (config.get)]
     (vim.fn.bufload buf)
     (tset vim.bo buf :filetype :markdown)
     (vim.cmd "botright split")
     (vim.api.nvim_win_set_buf 0 buf)
+    (when cfg.split_height
+      (vim.api.nvim_win_set_height 0 cfg.split_height))
     (tset vim.wo :wrap true)
     (try_attach_copilot 1)
     buf))

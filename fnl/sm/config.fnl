@@ -8,6 +8,7 @@
    :date_format "%Y%m%d_%H%M%S"
    :auto_tag_git_repo false ; optional: add git repo name as tag when creating memo
    :copilot_integration false  ; opt-in: attach copilot to memo buffers
+   :split_height 15  ; height for horizontal split window
    :template ["---"
               "tags: [%tags%]"
               "created: %date%"

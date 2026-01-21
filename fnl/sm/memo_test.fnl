@@ -110,4 +110,51 @@
   (let [content (M2.generate_template "Test" (M2._get_initial_tags))]
     (assert (content:match "tags: %[test%-repo%]") "auto_tag: template includes repo tag")))
 
+;; Test split_height config sets window height
+(do
+  ;; Clear package.loaded for fresh mocks
+  (tset package.loaded :sm.config nil)
+  (tset package.loaded :sm.git nil)
+  (tset package.loaded :sm.memo nil)
+
+  ;; Track nvim_win_set_height calls
+  (var set_height_calls [])
+  (when (not _G.vim.api)
+    (set _G.vim.api {}))
+  (tset _G.vim.api :nvim_win_set_height
+        (fn [win height]
+          (table.insert set_height_calls {:win win :height height})))
+
+  ;; Mock config with split_height
+  (tset package.loaded :sm.config
+        {:get (fn []
+                {:split_height 15
+                 :copilot_integration false
+                 :date_format "%Y%m%d_%H%M%S"
+                 :template ["---" "# %title%" ""]})
+         :get_memos_dir (fn [] "/tmp/test-memos")})
+
+  ;; Mock other dependencies
+  (tset package.loaded :sm.git {:get_repo_tag (fn [] nil) :is_git_repo (fn [] false)})
+  (tset package.loaded :sm.state {:set_last_edited (fn []) :add_recent (fn []) :load (fn [] {})})
+
+  ;; Mock vim functions needed by open_in_split
+  (tset _G.vim.fn :bufadd (fn [filepath] 1))
+  (tset _G.vim.fn :bufload (fn [buf] nil))
+  ;; vim.bo[buf] and vim.wo need metatable for buffer/window-specific access
+  (set _G.vim.bo (setmetatable {} {:__index (fn [] {})}))
+  (set _G.vim.wo (setmetatable {} {:__index (fn [] {})}))
+  (tset _G.vim :cmd (fn [cmd] nil))
+  (tset _G.vim.api :nvim_win_set_buf (fn [win buf] nil))
+
+  ;; Re-require memo with mocks
+  (local M3 (require :sm.memo))
+
+  ;; Call open_in_split
+  (M3.open_in_split "/tmp/test-memos/test.md")
+
+  ;; Verify nvim_win_set_height was called with correct value
+  (assert (= (length set_height_calls) 1) "split_height: nvim_win_set_height called once")
+  (assert (= (. set_height_calls 1 :height) 15) "split_height: height set to config value"))
+
 (print "memo_test.lua: All tests passed")
