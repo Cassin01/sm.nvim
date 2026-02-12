@@ -29,7 +29,7 @@ Features:
 - YAML frontmatter with tags
 - Picker-agnostic API (works with any picker)
 - Wiki-style `[[links]]` between memos
-- Floating window UI with Copilot support
+- Opens memos in the current buffer
 - Persistent state tracking (last edited, recent memos)
 
 ==============================================================================
@@ -37,7 +37,7 @@ REQUIREMENTS						*sm-requirements*
 
 - Neovim 0.8.0+ (latest recommended)
 - Any picker (fzf-lua, snacks.nvim, mini.pick, wf.nvim, etc.) - optional
-- copilot.vim (optional, for floating window support)
+- copilot.vim (optional, for Copilot integration in memo buffers)
 
 ==============================================================================
 INSTALL							*sm-install*
@@ -164,13 +164,6 @@ Default options:
 			"",
 			"# %title%",
 			""
-		},
-
-		window = {
-			width = 80,
-			height = 30,
-			border = "rounded",
-			style = "minimal"
 		}
 	}
 	<
@@ -196,9 +189,9 @@ Options:
 		Default: false
 
 	copilot_integration ~
-		When true, attaches Copilot to memo buffers opened in
-		floating windows. Uses exponential backoff for reliable
-		attachment. Requires copilot.vim plugin.
+		When true, attaches Copilot to memo buffers. Uses
+		exponential backoff for reliable attachment. Requires
+		copilot.vim plugin.
 		Default: false
 
 	template ~
@@ -206,13 +199,6 @@ Options:
 		- `%date%` - ISO 8601 timestamp (e.g., `2026-01-17T14:30:52`)
 		- `%title%` - Memo title
 		- `%tags%` - Initial tags (comma-separated)
-
-	window ~
-		Floating window configuration:
-		- `width` - Window width (default: 80)
-		- `height` - Window height (default: 30)
-		- `border` - Border style (default: "rounded")
-		- `style` - Window style (default: "minimal")
 
 ==============================================================================
 MEMO FORMAT						*sm-memo-format*
@@ -289,11 +275,6 @@ Complete setup with keymaps:
 
 	sm.setup({
 		memos_dir = "~/.local/share/nvim/memos",
-		window = {
-			width = 100,
-			height = 40,
-			border = "double",
-		},
 	})
 
 	vim.keymap.set("n", "<Leader>mn", sm.create,

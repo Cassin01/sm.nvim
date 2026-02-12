@@ -121,30 +121,11 @@ local function goto_last_line()
   local last_line = vim.api.nvim_buf_line_count(0)
   return vim.api.nvim_win_set_cursor(0, {last_line, 0})
 end
-M.open_in_split = function(filepath)
-  local buf = vim.fn.bufadd(filepath)
-  local cfg = config.get()
-  vim.fn.bufload(buf)
-  vim.bo[buf]["filetype"] = "markdown"
-  vim.cmd("botright split")
-  vim.api.nvim_win_set_buf(0, buf)
-  if cfg.split_height then
-    vim.api.nvim_win_set_height(0, cfg.split_height)
-  else
-  end
-  vim.wo["wrap"] = true
-  try_attach_copilot(1)
-  return buf
-end
-M.open_in_window = function(filepath, _3fopts)
-  local cfg = config.get()
-  local opts = (_3fopts or {})
-  local width = (opts.width or cfg.window.width)
-  local height = (opts.height or cfg.window.height)
+M.open_in_buffer = function(filepath)
   local buf = vim.fn.bufadd(filepath)
   vim.fn.bufload(buf)
   vim.bo[buf]["filetype"] = "markdown"
-  vim.api.nvim_open_win(buf, true, {relative = "editor", style = cfg.window.style, border = cfg.window.border, row = math.max(0, (vim.o.lines - height - 4)), col = 2, height = height, width = width})
+  vim.api.nvim_set_current_buf(buf)
   vim.wo["wrap"] = true
   try_attach_copilot(1)
   return buf
@@ -165,7 +146,7 @@ M.create = function(_3ftitle)
         vim.notify(("Failed to create memo: " .. (err or "unknown error")), vim.log.levels.ERROR)
       end
     end
-    M.open_in_split(filepath)
+    M.open_in_buffer(filepath)
     goto_last_line()
     state.set_last_edited(filename)
     state.add_recent(filename)
@@ -176,7 +157,7 @@ M.create = function(_3ftitle)
 end
 M.open = function(filepath)
   local filename = vim.fn.fnamemodify(filepath, ":t")
-  M.open_in_split(filepath)
+  M.open_in_buffer(filepath)
   state.set_last_edited(filename)
   return state.add_recent(filename)
 end
@@ -193,10 +174,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _18_(a, b)
+  local function _17_(a, b)
     return (a > b)
   end
-  table.sort(files, _18_)
+  table.sort(files, _17_)
   return files
 end
 M.delete = function(filepath)

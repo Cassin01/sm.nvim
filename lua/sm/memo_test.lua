@@ -124,17 +124,18 @@ do
   package.loaded["sm.config"] = nil
   package.loaded["sm.git"] = nil
   package.loaded["sm.memo"] = nil
-  local set_height_calls = {}
+  local set_current_buf_calls = {}
+  local cmd_calls = {}
   if not _G.vim.api then
     _G.vim.api = {}
   else
   end
-  local function _20_(win, height)
-    return table.insert(set_height_calls, {win = win, height = height})
+  local function _20_(buf)
+    return table.insert(set_current_buf_calls, buf)
   end
-  _G.vim.api["nvim_win_set_height"] = _20_
+  _G.vim.api["nvim_set_current_buf"] = _20_
   local function _21_()
-    return {split_height = 15, date_format = "%Y%m%d_%H%M%S", template = {"---", "# %title%", ""}, copilot_integration = false}
+    return {date_format = "%Y%m%d_%H%M%S", template = {"---", "# %title%", ""}, copilot_integration = false}
   end
   local function _22_()
     return "/tmp/test-memos"
@@ -156,7 +157,7 @@ do
   end
   package.loaded["sm.state"] = {set_last_edited = _25_, add_recent = _26_, load = _27_}
   local function _28_(filepath)
-    return 1
+    return 42
   end
   _G.vim.fn["bufadd"] = _28_
   local function _29_(buf)
@@ -172,16 +173,21 @@ do
   end
   _G.vim.wo = setmetatable({}, {__index = _31_})
   local function _32_(cmd)
-    return nil
+    return table.insert(cmd_calls, cmd)
   end
   _G.vim["cmd"] = _32_
-  local function _33_(win, buf)
-    return nil
-  end
-  _G.vim.api["nvim_win_set_buf"] = _33_
   local M3 = require("sm.memo")
-  M3.open_in_split("/tmp/test-memos/test.md")
-  assert((#set_height_calls == 1), "split_height: nvim_win_set_height called once")
-  assert((set_height_calls[1].height == 15), "split_height: height set to config value")
+  local buf = M3.open_in_buffer("/tmp/test-memos/test.md")
+  assert((#set_current_buf_calls == 1), "open_in_buffer: nvim_set_current_buf called once")
+  assert((set_current_buf_calls[1] == 42), "open_in_buffer: correct buffer id passed")
+  local has_split = false
+  for _, cmd in ipairs(cmd_calls) do
+    if cmd:match("split") then
+      has_split = true
+    else
+    end
+  end
+  assert(not has_split, "open_in_buffer: no split command issued")
+  assert((buf == 42), "open_in_buffer: returns buffer id")
 end
 return print("memo_test.lua: All tests passed")
