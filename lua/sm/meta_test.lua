@@ -67,7 +67,7 @@ local function _16_()
 end
 package.loaded["sm.state"] = {get_recent = _15_, get_last_edited = _16_}
 local function _17_()
-  return {window = {width = 80, height = 30, border = "rounded", style = "minimal"}}
+  return {}
 end
 local function _18_()
   return "/tmp/memos"

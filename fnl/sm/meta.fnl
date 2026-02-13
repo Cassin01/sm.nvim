@@ -2,7 +2,6 @@
 ;;; A joke command that displays self-aware memo statistics
 
 (local M {})
-(local config (require :sm.config))
 
 (fn M.get_statistics []
   "Gather memo statistics from existing modules"
@@ -122,11 +121,10 @@
 
 (fn M.show_in_float []
   "Display meta-memo in a floating window"
-  (let [cfg (config.get)
-        lines (M.generate_meta_content)
+  (let [lines (M.generate_meta_content)
         buf (vim.api.nvim_create_buf false true)
-        width (or cfg.window.width 80)
-        height (math.min (+ (length lines) 2) (or cfg.window.height 30))
+        width 80
+        height (math.min (+ (length lines) 2) 30)
         row (math.floor (/ (- vim.o.lines height) 2))
         col (math.floor (/ (- vim.o.columns width) 2))]
 
@@ -141,8 +139,8 @@
     ;; Open floating window
     (let [win (vim.api.nvim_open_win buf true
                 {:relative :editor
-                 :style (or cfg.window.style :minimal)
-                 :border (or cfg.window.border :rounded)
+                 :style :minimal
+                 :border :rounded
                  :row row
                  :col col
                  :width width

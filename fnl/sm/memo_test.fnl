@@ -110,26 +110,31 @@
   (let [content (M2.generate_template "Test" (M2._get_initial_tags))]
     (assert (content:match "tags: %[test%-repo%]") "auto_tag: template includes repo tag")))
 
-;; Test split_height config sets window height
+;; Test open_in_buffer sets current buffer without creating a split
 (do
   ;; Clear package.loaded for fresh mocks
   (tset package.loaded :sm.config nil)
   (tset package.loaded :sm.git nil)
   (tset package.loaded :sm.memo nil)
 
-  ;; Track nvim_win_set_height calls
-  (var set_height_calls [])
+  ;; Track API calls
+  (var set_current_buf_calls [])
+  (var cmd_calls [])
+  (var open_win_calls [])
   (when (not _G.vim.api)
     (set _G.vim.api {}))
-  (tset _G.vim.api :nvim_win_set_height
-        (fn [win height]
-          (table.insert set_height_calls {:win win :height height})))
+  (tset _G.vim.api :nvim_set_current_buf
+        (fn [buf]
+          (table.insert set_current_buf_calls buf)))
+  (tset _G.vim.api :nvim_open_win
+        (fn [buf enter opts]
+          (table.insert open_win_calls {:buf buf :enter enter :opts opts})
+          1))
 
-  ;; Mock config with split_height
+  ;; Mock config without split_height
   (tset package.loaded :sm.config
         {:get (fn []
-                {:split_height 15
-                 :copilot_integration false
+                {:copilot_integration false
                  :date_format "%Y%m%d_%H%M%S"
                  :template ["---" "# %title%" ""]})
          :get_memos_dir (fn [] "/tmp/test-memos")})
@@ -138,23 +143,30 @@
   (tset package.loaded :sm.git {:get_repo_tag (fn [] nil) :is_git_repo (fn [] false)})
   (tset package.loaded :sm.state {:set_last_edited (fn []) :add_recent (fn []) :load (fn [] {})})
 
-  ;; Mock vim functions needed by open_in_split
-  (tset _G.vim.fn :bufadd (fn [filepath] 1))
+  ;; Mock vim functions needed by open_in_buffer
+  (tset _G.vim.fn :bufadd (fn [filepath] 42))
   (tset _G.vim.fn :bufload (fn [buf] nil))
-  ;; vim.bo[buf] and vim.wo need metatable for buffer/window-specific access
   (set _G.vim.bo (setmetatable {} {:__index (fn [] {})}))
   (set _G.vim.wo (setmetatable {} {:__index (fn [] {})}))
-  (tset _G.vim :cmd (fn [cmd] nil))
-  (tset _G.vim.api :nvim_win_set_buf (fn [win buf] nil))
+  (tset _G.vim :cmd (fn [cmd] (table.insert cmd_calls cmd)))
 
   ;; Re-require memo with mocks
   (local M3 (require :sm.memo))
 
-  ;; Call open_in_split
-  (M3.open_in_split "/tmp/test-memos/test.md")
-
-  ;; Verify nvim_win_set_height was called with correct value
-  (assert (= (length set_height_calls) 1) "split_height: nvim_win_set_height called once")
-  (assert (= (. set_height_calls 1 :height) 15) "split_height: height set to config value"))
+  ;; Call open_in_buffer
+  (let [buf (M3.open_in_buffer "/tmp/test-memos/test.md")]
+    ;; Verify nvim_set_current_buf was called with the buffer
+    (assert (= (length set_current_buf_calls) 1) "open_in_buffer: nvim_set_current_buf called once")
+    (assert (= (. set_current_buf_calls 1) 42) "open_in_buffer: correct buffer id passed")
+    ;; Verify no split command was issued
+    (var has_split false)
+    (each [_ cmd (ipairs cmd_calls)]
+      (when (cmd:match "split")
+        (set has_split true)))
+    (assert (not has_split) "open_in_buffer: no split command issued")
+    ;; Verify nvim_open_win was NOT called (no floating window)
+    (assert (= (length open_win_calls) 0) "open_in_buffer: nvim_open_win not called")
+    ;; Verify return value
+    (assert (= buf 42) "open_in_buffer: returns buffer id")))
 
 (print "memo_test.lua: All tests passed")

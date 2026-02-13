@@ -50,8 +50,7 @@
 
 ;; Mock config module
 (tset package.loaded :sm.config
-      {:get (fn []
-              {:window {:width 80 :height 30 :border "rounded" :style "minimal"}})
+      {:get (fn [] {})
        :get_memos_dir (fn [] "/tmp/memos")})
 
 ;; Require module under test
