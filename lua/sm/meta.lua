@@ -1,5 +1,4 @@
 local M = {}
-local config = require("sm.config")
 M.get_statistics = function()
   local memo = require("sm.memo")
   local tags = require("sm.tags")
@@ -97,18 +96,17 @@ M.generate_meta_content = function()
   return lines
 end
 M.show_in_float = function()
-  local cfg = config.get()
   local lines = M.generate_meta_content()
   local buf = vim.api.nvim_create_buf(false, true)
-  local width = (cfg.window.width or 80)
-  local height = math.min((#lines + 2), (cfg.window.height or 30))
+  local width = 80
+  local height = math.min((#lines + 2), 30)
   local row = math.floor(((vim.o.lines - height) / 2))
   local col = math.floor(((vim.o.columns - width) / 2))
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.bo[buf]["modifiable"] = false
   vim.bo[buf]["bufhidden"] = "wipe"
   vim.bo[buf]["filetype"] = "markdown"
-  local win = vim.api.nvim_open_win(buf, true, {relative = "editor", style = (cfg.window.style or "minimal"), border = (cfg.window.border or "rounded"), row = row, col = col, width = width, height = height, title = " The Memo Knows ", title_pos = "center"})
+  local win = vim.api.nvim_open_win(buf, true, {relative = "editor", style = "minimal", border = "rounded", row = row, col = col, width = width, height = height, title = " The Memo Knows ", title_pos = "center"})
   local function _8_()
     return vim.api.nvim_win_close(win, true)
   end

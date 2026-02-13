@@ -126,6 +126,7 @@ do
   package.loaded["sm.memo"] = nil
   local set_current_buf_calls = {}
   local cmd_calls = {}
+  local open_win_calls = {}
   if not _G.vim.api then
     _G.vim.api = {}
   else
@@ -134,48 +135,53 @@ do
     return table.insert(set_current_buf_calls, buf)
   end
   _G.vim.api["nvim_set_current_buf"] = _20_
-  local function _21_()
+  local function _21_(buf, enter, opts)
+    table.insert(open_win_calls, {buf = buf, enter = enter, opts = opts})
+    return 1
+  end
+  _G.vim.api["nvim_open_win"] = _21_
+  local function _22_()
     return {date_format = "%Y%m%d_%H%M%S", template = {"---", "# %title%", ""}, copilot_integration = false}
   end
-  local function _22_()
+  local function _23_()
     return "/tmp/test-memos"
   end
-  package.loaded["sm.config"] = {get = _21_, get_memos_dir = _22_}
-  local function _23_()
+  package.loaded["sm.config"] = {get = _22_, get_memos_dir = _23_}
+  local function _24_()
     return nil
   end
-  local function _24_()
+  local function _25_()
     return false
   end
-  package.loaded["sm.git"] = {get_repo_tag = _23_, is_git_repo = _24_}
-  local function _25_()
-  end
+  package.loaded["sm.git"] = {get_repo_tag = _24_, is_git_repo = _25_}
   local function _26_()
   end
   local function _27_()
+  end
+  local function _28_()
     return {}
   end
-  package.loaded["sm.state"] = {set_last_edited = _25_, add_recent = _26_, load = _27_}
-  local function _28_(filepath)
+  package.loaded["sm.state"] = {set_last_edited = _26_, add_recent = _27_, load = _28_}
+  local function _29_(filepath)
     return 42
   end
-  _G.vim.fn["bufadd"] = _28_
-  local function _29_(buf)
+  _G.vim.fn["bufadd"] = _29_
+  local function _30_(buf)
     return nil
   end
-  _G.vim.fn["bufload"] = _29_
-  local function _30_()
-    return {}
-  end
-  _G.vim.bo = setmetatable({}, {__index = _30_})
+  _G.vim.fn["bufload"] = _30_
   local function _31_()
     return {}
   end
-  _G.vim.wo = setmetatable({}, {__index = _31_})
-  local function _32_(cmd)
+  _G.vim.bo = setmetatable({}, {__index = _31_})
+  local function _32_()
+    return {}
+  end
+  _G.vim.wo = setmetatable({}, {__index = _32_})
+  local function _33_(cmd)
     return table.insert(cmd_calls, cmd)
   end
-  _G.vim["cmd"] = _32_
+  _G.vim["cmd"] = _33_
   local M3 = require("sm.memo")
   local buf = M3.open_in_buffer("/tmp/test-memos/test.md")
   assert((#set_current_buf_calls == 1), "open_in_buffer: nvim_set_current_buf called once")
@@ -188,6 +194,7 @@ do
     end
   end
   assert(not has_split, "open_in_buffer: no split command issued")
+  assert((#open_win_calls == 0), "open_in_buffer: nvim_open_win not called")
   assert((buf == 42), "open_in_buffer: returns buffer id")
 end
 return print("memo_test.lua: All tests passed")

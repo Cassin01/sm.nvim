@@ -120,11 +120,16 @@
   ;; Track API calls
   (var set_current_buf_calls [])
   (var cmd_calls [])
+  (var open_win_calls [])
   (when (not _G.vim.api)
     (set _G.vim.api {}))
   (tset _G.vim.api :nvim_set_current_buf
         (fn [buf]
           (table.insert set_current_buf_calls buf)))
+  (tset _G.vim.api :nvim_open_win
+        (fn [buf enter opts]
+          (table.insert open_win_calls {:buf buf :enter enter :opts opts})
+          1))
 
   ;; Mock config without split_height
   (tset package.loaded :sm.config
@@ -159,6 +164,8 @@
       (when (cmd:match "split")
         (set has_split true)))
     (assert (not has_split) "open_in_buffer: no split command issued")
+    ;; Verify nvim_open_win was NOT called (no floating window)
+    (assert (= (length open_win_calls) 0) "open_in_buffer: nvim_open_win not called")
     ;; Verify return value
     (assert (= buf 42) "open_in_buffer: returns buffer id")))
 

@@ -28,7 +28,7 @@ Timestamped memos with wiki-style linking, right in your editor.
 - **Timestamped memos** — Files named `YYYYMMDD_HHMMSS_{title}.md`
 - **YAML frontmatter** — Tags, creation date, and metadata
 - **Wiki-style linking** — Connect memos with `[[links]]`
-- **Floating window UI** — Distraction-free editing
+- **Current buffer editing** — Opens memos in your current buffer
 - **Git auto-tagging** — Automatically tag memos with repository name
 - **Picker-agnostic** — Works with fzf-lua, snacks.nvim, mini.pick, or any picker
 
@@ -46,7 +46,6 @@ Timestamped memos with wiki-style linking, right in your editor.
       -- date_format = "%Y%m%d_%H%M%S",
       -- auto_tag_git_repo = false,
       -- copilot_integration = false,
-      -- window = { width = 80, height = 30, border = "rounded", style = "minimal" },
     })
 
     -- Buffer-local keymaps for memo files
@@ -106,11 +105,6 @@ That's it! Your memos are saved to `~/.cache/nvim/sm/memos/` by default.
 require("sm").setup({
   memos_dir = "~/.cache/nvim/sm/memos",  -- Where memos are stored
   auto_tag_git_repo = true,              -- Auto-tag with git repo name
-  window = {
-    width = 80,
-    height = 30,
-    border = "rounded",
-  },
 })
 ```
 
@@ -124,7 +118,6 @@ require("sm").setup({
 | `auto_tag_git_repo` | `false` | Auto-tag new memos with git repo name (sanitized: "sm.nvim" → "sm-nvim") |
 | `copilot_integration` | `false` | Attach Copilot to memo buffers (requires copilot.vim) |
 | `template` | See below | Template for new memo content (supports `%date%`, `%title%`, `%tags%` placeholders) |
-| `window` | `{width=80, height=30, border="rounded", style="minimal"}` | Floating window configuration |
 
 ## 📋 Commands
 
@@ -350,7 +343,7 @@ api.get_memos_by_tag(tag)  -- Filtered memos: {value, text, ordinal, info}
 api.get_memos_for_link()   -- For links: {value, text, ordinal, filepath}
 
 -- Action functions
-api.open_memo(filepath)    -- Open memo in floating window
+api.open_memo(filepath)    -- Open memo file
 api.insert_link(filename)  -- Insert [[filename]] at cursor
 
 -- Utility
