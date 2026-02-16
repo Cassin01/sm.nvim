@@ -22,7 +22,9 @@
                                    (if (= modifier ":t")
                                        (path:match "([^/]+)$")
                                        path))
-                    :stdpath (fn [which] "/tmp/test-nvim-cache")}}))
+                    :stdpath (fn [which] "/tmp/test-nvim-cache")}
+               :uv {:fs_stat (fn [filepath]
+                                {:mtime {:sec 1737200000}})}}))
 
 ;; Mock state module to avoid circular dependency issues
 (tset package.loaded :sm.state {:set_last_edited (fn [])
@@ -54,11 +56,31 @@
   (assert (content:match "tags: %[%]") "template: has empty tags")
   (assert (content:match "# Test Title") "template: has title heading"))
 
+;; Test parse_date_to_timestamp
+(let [ts (M._parse_date_to_timestamp "20260117_143052")]
+  (assert ts "parse_date: returns non-nil for valid date")
+  (assert (= (type ts) :number) "parse_date: returns a number")
+  (let [d (os.date "*t" ts)]
+    (assert (= d.year 2026) "parse_date: correct year")
+    (assert (= d.month 1) "parse_date: correct month")
+    (assert (= d.day 17) "parse_date: correct day")
+    (assert (= d.hour 14) "parse_date: correct hour")
+    (assert (= d.min 30) "parse_date: correct min")
+    (assert (= d.sec 52) "parse_date: correct sec")))
+
+(assert (= (M._parse_date_to_timestamp nil) nil) "parse_date: nil input returns nil")
+(assert (= (M._parse_date_to_timestamp "invalid") nil) "parse_date: invalid input returns nil")
+
 ;; Test get_memo_info
 (let [info (M.get_memo_info "/path/to/20260117_143052_my-memo.md")]
   (assert (= info.filename "20260117_143052_my-memo.md") "info: filename")
   (assert (= info.date "20260117_143052") "info: date")
-  (assert (= info.title "my memo") "info: title with spaces"))
+  (assert (= info.title "my memo") "info: title with spaces")
+  ;; Timestamp fields
+  (assert info.created_at "info: has created_at")
+  (assert (= (type info.created_at) :number) "info: created_at is number")
+  (assert info.updated_at "info: has updated_at")
+  (assert (= info.updated_at 1737200000) "info: updated_at from fs_stat mtime"))
 
 ;; Test generate_template with initial tags
 (let [content (M.generate_template "Test" ["tag1" "tag2"])]

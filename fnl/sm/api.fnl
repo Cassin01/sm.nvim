@@ -22,7 +22,9 @@
            :text display
            :ordinal ordinal
            :info info
-           :tags tags})))
+           :tags tags
+           :created_at info.created_at
+           :updated_at info.updated_at})))
     entries))
 
 (fn M.get_tags []
@@ -54,7 +56,9 @@
           {:value filepath
            :text display
            :ordinal ordinal
-           :info info})))
+           :info info
+           :created_at info.created_at
+           :updated_at info.updated_at})))
     entries))
 
 (fn M.get_memos_for_link []
@@ -72,7 +76,9 @@
           {:value filename
            :text display
            :ordinal ordinal
-           :filepath filepath})))
+           :filepath filepath
+           :created_at info.created_at
+           :updated_at info.updated_at})))
     entries))
 
 (fn M.open_memo [filepath]

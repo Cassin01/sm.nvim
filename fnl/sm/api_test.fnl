@@ -33,7 +33,9 @@
                           {:filepath filepath
                            :filename filename
                            :date date-part
-                           :title title-part}))
+                           :title title-part
+                           :created_at 1737100800
+                           :updated_at 1737200000}))
        :open (fn [filepath]
                (set last-open-memo-call filepath)
                true)})
@@ -69,7 +71,12 @@
     (assert first-entry.info "get_memos: entry has info")
     (assert first-entry.tags "get_memos: entry has tags")
     (assert (first-entry.text:match "%[work, ideas%]") "get_memos: text includes tags")
-    (assert (= (length first-entry.tags) 2) "get_memos: first entry has 2 tags"))
+    (assert (= (length first-entry.tags) 2) "get_memos: first entry has 2 tags")
+    ;; Timestamp fields for picker sorting
+    (assert first-entry.created_at "get_memos: entry has created_at")
+    (assert (= (type first-entry.created_at) :number) "get_memos: created_at is number")
+    (assert first-entry.updated_at "get_memos: entry has updated_at")
+    (assert (= (type first-entry.updated_at) :number) "get_memos: updated_at is number"))
   (let [second-entry (. memos 2)]
     (assert (not (second-entry.text:match "%[")) "get_memos: no brackets when no tags")
     (assert (= (length second-entry.tags) 0) "get_memos: second entry has 0 tags")))
@@ -89,7 +96,9 @@
   (let [entry (. memos 1)]
     (assert entry.value "get_memos_by_tag: entry has value")
     (assert entry.text "get_memos_by_tag: entry has text")
-    (assert entry.info "get_memos_by_tag: entry has info")))
+    (assert entry.info "get_memos_by_tag: entry has info")
+    (assert entry.created_at "get_memos_by_tag: entry has created_at")
+    (assert entry.updated_at "get_memos_by_tag: entry has updated_at")))
 
 (let [empty-memos (api.get_memos_by_tag "nonexistent")]
   (assert (= (length empty-memos) 0) "get_memos_by_tag: returns empty for unknown tag"))
@@ -100,7 +109,9 @@
   (let [entry (. links 1)]
     (assert (= entry.value "20260117_120000_first-memo") "get_memos_for_link: value is filename without ext")
     (assert entry.text "get_memos_for_link: entry has text")
-    (assert entry.filepath "get_memos_for_link: entry has filepath")))
+    (assert entry.filepath "get_memos_for_link: entry has filepath")
+    (assert entry.created_at "get_memos_for_link: entry has created_at")
+    (assert entry.updated_at "get_memos_for_link: entry has updated_at")))
 
 ;; Test open_memo
 (set last-open-memo-call nil)

@@ -9,6 +9,35 @@ local function ensure_memos_dir()
   end
   return dir
 end
+local function parse_date_to_timestamp(date_str)
+  if date_str then
+    local year, month, day, hour, min, sec = date_str:match("(%d%d%d%d)(%d%d)(%d%d)_(%d%d)(%d%d)(%d%d)")
+    if year then
+      return os.time({year = tonumber(year), month = tonumber(month), day = tonumber(day), hour = tonumber(hour), min = tonumber(min), sec = tonumber(sec)})
+    else
+      return nil
+    end
+  else
+    return nil
+  end
+end
+local function get_file_mtime(filepath)
+  local uv = (vim.uv or vim.loop)
+  if uv then
+    local ok, stat
+    local function _4_()
+      return uv.fs_stat(filepath)
+    end
+    ok, stat = pcall(_4_)
+    if (ok and stat and stat.mtime) then
+      return stat.mtime.sec
+    else
+      return nil
+    end
+  else
+    return nil
+  end
+end
 local function sanitize_title(title)
   return title:lower():gsub("[%s%c!\"#$%%&'()*+,./:;<=>?@%[\\%]^`{|}~]+", "-"):gsub("^%-+", ""):gsub("%-+$", ""):gsub("%-%-+", "-")
 end
@@ -97,19 +126,19 @@ local function try_attach_copilot(attempts)
     if copilot_ok then
       local max_attempts = 3
       local delay = (attempts * 100)
-      local function _9_()
+      local function _14_()
         local ok, err
-        local function _10_()
+        local function _15_()
           return copilot.attach({force = true})
         end
-        ok, err = pcall(_10_)
+        ok, err = pcall(_15_)
         if (not ok and (attempts < max_attempts)) then
           return try_attach_copilot((attempts + 1))
         else
           return nil
         end
       end
-      return vim.defer_fn(_9_, delay)
+      return vim.defer_fn(_14_, delay)
     else
       return nil
     end
@@ -174,10 +203,10 @@ M.list = function()
   ensure_memos_dir()
   local dir = config.get_memos_dir()
   local files = vim.fn.glob((dir .. "/*.md"), false, true)
-  local function _17_(a, b)
+  local function _22_(a, b)
     return (a > b)
   end
-  table.sort(files, _17_)
+  table.sort(files, _22_)
   return files
 end
 M.delete = function(filepath)
@@ -192,8 +221,11 @@ M.get_memo_info = function(filepath)
   local filename = vim.fn.fnamemodify(filepath, ":t")
   local date_part = filename:match("^(%d+_%d+)_")
   local title_part = (filename:match("^%d+_%d+_(.+)%.md$") or "untitled")
-  return {filepath = filepath, filename = filename, date = date_part, title = title_part:gsub("-", " ")}
+  local created_at = parse_date_to_timestamp(date_part)
+  local updated_at = get_file_mtime(filepath)
+  return {filepath = filepath, filename = filename, date = date_part, title = title_part:gsub("-", " "), created_at = created_at, updated_at = updated_at}
 end
 M["_sanitize_title"] = sanitize_title
 M["_get_initial_tags"] = get_initial_tags
+M["_parse_date_to_timestamp"] = parse_date_to_timestamp
 return M
