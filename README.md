@@ -185,6 +185,10 @@ end
 -- List and open memos
 vim.keymap.set("n", "<Leader>ml", function()
   local entries = api.get_memos()
+  -- OPTION: Sort by last modified time (most recent first)
+  table.sort(entries, function(a, b)
+    return (a.updated_at or 0) > (b.updated_at or 0)
+  end)
   local items = {}
   local lookup = {}
   for _, entry in ipairs(entries) do
