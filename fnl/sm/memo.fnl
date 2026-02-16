@@ -11,6 +11,27 @@
       (vim.fn.mkdir dir :p))
     dir))
 
+(fn parse_date_to_timestamp [date_str]
+  "Parse YYYYMMDD_HHMMSS format to epoch timestamp"
+  (when date_str
+    (let [(year month day hour min sec)
+          (date_str:match "(%d%d%d%d)(%d%d)(%d%d)_(%d%d)(%d%d)(%d%d)")]
+      (when year
+        (os.time {:year (tonumber year)
+                  :month (tonumber month)
+                  :day (tonumber day)
+                  :hour (tonumber hour)
+                  :min (tonumber min)
+                  :sec (tonumber sec)})))))
+
+(fn get_file_mtime [filepath]
+  "Get file modification time as epoch timestamp"
+  (let [uv (or vim.uv vim.loop)]
+    (when uv
+      (let [(ok stat) (pcall #(uv.fs_stat filepath))]
+        (when (and ok stat stat.mtime)
+          stat.mtime.sec)))))
+
 (fn sanitize_title [title]
   "Convert title to safe filename component"
   (-> title
@@ -184,19 +205,24 @@
     true))
 
 (fn M.get_memo_info [filepath]
-  "Extract memo metadata"
+  "Extract memo metadata including timestamps for picker integration"
   (let [filename (vim.fn.fnamemodify filepath ":t")
         date_part (filename:match "^(%d+_%d+)_")
         title_part (-> filename
                       (: :match "^%d+_%d+_(.+)%.md$")
-                      (or "untitled"))]
+                      (or "untitled"))
+        created_at (parse_date_to_timestamp date_part)
+        updated_at (get_file_mtime filepath)]
     {:filepath filepath
      :filename filename
      :date date_part
-     :title (title_part:gsub "-" " ")}))
+     :title (title_part:gsub "-" " ")
+     :created_at created_at
+     :updated_at updated_at}))
 
 ;; Export for testing
 (tset M :_sanitize_title sanitize_title)
 (tset M :_get_initial_tags get_initial_tags)
+(tset M :_parse_date_to_timestamp parse_date_to_timestamp)
 
 M

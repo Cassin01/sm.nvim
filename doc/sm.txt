@@ -13,6 +13,7 @@ INTERFACE		|sm-interface|
  FUNCTIONS		|sm-functions|
  MAPPINGS		|sm-mappings|
  OPTIONS		|sm-options|
+ PICKER API		|sm-picker-api|
 MEMO FORMAT		|sm-memo-format|
  FRONTMATTER		|sm-frontmatter|
  WIKI LINKS		|sm-wiki-links|
@@ -199,6 +200,64 @@ Options:
 		- `%date%` - ISO 8601 timestamp (e.g., `2026-01-17T14:30:52`)
 		- `%title%` - Memo title
 		- `%tags%` - Initial tags (comma-separated)
+
+Picker API ~
+							*sm-picker-api*
+
+The API module (`require("sm.api")`) provides data for picker integration.
+All list functions return arrays of entry tables with fields suitable for
+picker display, sorting, and filtering.
+
+							*sm.api.get_memos()*
+sm.api.get_memos()
+	Returns all memos as picker entries. Each entry has:
+	`value`      Filepath (string)
+	`text`       Display text: "date | title [tags]" (string)
+	`ordinal`    Searchable text (string)
+	`info`       Metadata table (see below)
+	`tags`       List of tag strings
+	`created_at` Creation timestamp in epoch seconds (number|nil)
+	`updated_at` Last modification timestamp in epoch seconds (number|nil)
+
+							*sm.api.get_tags()*
+sm.api.get_tags()
+	Returns all tags with memo counts. Each entry has:
+	`value`    Tag name (string)
+	`text`     "tag (N memos)" (string)
+	`ordinal`  Tag name (string)
+	`count`    Number of memos with this tag (number)
+
+							*sm.api.get_memos_by_tag()*
+sm.api.get_memos_by_tag({tag})
+	Returns memos filtered by {tag}. Entry fields match |sm.api.get_memos()|
+	except `tags` is omitted.
+
+							*sm.api.get_memos_for_link()*
+sm.api.get_memos_for_link()
+	Returns memos formatted for link insertion. Each entry has:
+	`value`      Filename without extension (string)
+	`text`       Display text (string)
+	`ordinal`    Searchable text (string)
+	`filepath`   Full file path (string)
+	`created_at` Creation timestamp in epoch seconds (number|nil)
+	`updated_at` Last modification timestamp in epoch seconds (number|nil)
+
+							*sm.api.get_memos_dir()*
+sm.api.get_memos_dir()
+	Returns the memos directory path (string).
+
+Memo info table ~
+							*sm-memo-info*
+The `info` table returned by the API contains:
+	`filepath`   Full file path (string)
+	`filename`   Base filename (string)
+	`date`       Date string from filename, e.g. "20260117_143052" (string)
+	`title`      Human-readable title (string)
+	`created_at` Creation timestamp parsed from filename (number|nil)
+	`updated_at` File modification time from filesystem (number|nil)
+
+Timestamps are epoch seconds (as returned by `os.time()`), suitable for
+numeric comparison and sorting in picker plugins.
 
 ==============================================================================
 MEMO FORMAT						*sm-memo-format*

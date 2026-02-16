@@ -15,7 +15,7 @@ M.get_memos = function()
     end
     local display = (info.date .. " | " .. info.title .. tags_str)
     local ordinal = (info.date .. " " .. info.title .. " " .. table.concat(tags, " "))
-    table.insert(entries, {value = filepath, text = display, ordinal = ordinal, info = info, tags = tags})
+    table.insert(entries, {value = filepath, text = display, ordinal = ordinal, info = info, tags = tags, created_at = info.created_at, updated_at = info.updated_at})
   end
   return entries
 end
@@ -37,7 +37,7 @@ M.get_memos_by_tag = function(tag)
     local info = memo.get_memo_info(filepath)
     local display = (info.date .. " | " .. info.title)
     local ordinal = (info.date .. " " .. info.title)
-    table.insert(entries, {value = filepath, text = display, ordinal = ordinal, info = info})
+    table.insert(entries, {value = filepath, text = display, ordinal = ordinal, info = info, created_at = info.created_at, updated_at = info.updated_at})
   end
   return entries
 end
@@ -50,7 +50,7 @@ M.get_memos_for_link = function()
     local filename = vim.fn.fnamemodify(filepath, ":t:r")
     local display = (info.date .. " | " .. info.title)
     local ordinal = (info.date .. " " .. info.title)
-    table.insert(entries, {value = filename, text = display, ordinal = ordinal, filepath = filepath})
+    table.insert(entries, {value = filename, text = display, ordinal = ordinal, filepath = filepath, created_at = info.created_at, updated_at = info.updated_at})
   end
   return entries
 end

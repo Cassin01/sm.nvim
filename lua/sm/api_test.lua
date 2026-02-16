@@ -26,7 +26,7 @@ local function _6_(filepath)
   local filename = filepath:match("([^/]+)$")
   local date_part = filename:match("^(%d+_%d+)_")
   local title_part = filename:match("^%d+_%d+_(.+)%.md$"):gsub("-", " ")
-  return {filepath = filepath, filename = filename, date = date_part, title = title_part}
+  return {filepath = filepath, filename = filename, date = date_part, title = title_part, created_at = 1737100800, updated_at = 1737200000}
 end
 local function _7_(filepath)
   last_open_memo_call = filepath
@@ -68,6 +68,10 @@ do
     assert(first_entry.tags, "get_memos: entry has tags")
     assert(first_entry.text:match("%[work, ideas%]"), "get_memos: text includes tags")
     assert((#first_entry.tags == 2), "get_memos: first entry has 2 tags")
+    assert(first_entry.created_at, "get_memos: entry has created_at")
+    assert((type(first_entry.created_at) == "number"), "get_memos: created_at is number")
+    assert(first_entry.updated_at, "get_memos: entry has updated_at")
+    assert((type(first_entry.updated_at) == "number"), "get_memos: updated_at is number")
   end
   local second_entry = memos[2]
   assert(not second_entry.text:match("%["), "get_memos: no brackets when no tags")
@@ -89,6 +93,8 @@ do
   assert(entry.value, "get_memos_by_tag: entry has value")
   assert(entry.text, "get_memos_by_tag: entry has text")
   assert(entry.info, "get_memos_by_tag: entry has info")
+  assert(entry.created_at, "get_memos_by_tag: entry has created_at")
+  assert(entry.updated_at, "get_memos_by_tag: entry has updated_at")
 end
 do
   local empty_memos = api.get_memos_by_tag("nonexistent")
@@ -101,6 +107,8 @@ do
   assert((entry.value == "20260117_120000_first-memo"), "get_memos_for_link: value is filename without ext")
   assert(entry.text, "get_memos_for_link: entry has text")
   assert(entry.filepath, "get_memos_for_link: entry has filepath")
+  assert(entry.created_at, "get_memos_for_link: entry has created_at")
+  assert(entry.updated_at, "get_memos_for_link: entry has updated_at")
 end
 last_open_memo_call = nil
 api.open_memo("/tmp/test/memo.md")
